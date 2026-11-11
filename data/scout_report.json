@@ -1,0 +1,198 @@
+{
+  "scoutingReports": [
+    {
+      "id": 1,
+      "playerId": 1,
+      "playerName": "Marcus Thompson",
+      "scoutName": "John Mitchell",
+      "date": "2024-11-15",
+      "matchDetails": {
+        "opponent": "Chelsea",
+        "competition": "Premier League",
+        "result": "2-1 Win",
+        "minutesPlayed": 90,
+        "position": "Centre Forward"
+      },
+      "ratings": {
+        "technical": 8,
+        "physical": 7,
+        "mental": 8,
+        "tactical": 7,
+        "finishing": 9,
+        "passing": 7,
+        "dribbling": 8,
+        "defending": 4,
+        "leadership": 6,
+        "workRate": 8
+      },
+      "strengths": [
+        "Excellent finishing ability in the box",
+        "Strong physical presence in aerial duels",
+        "Good movement off the ball",
+        "Clinical with both feet"
+      ],
+      "weaknesses": [
+        "Limited contribution to defensive work",
+        "Can be isolated when team is under pressure",
+        "Needs to improve link-up play with midfield"
+      ],
+      "keyMoments": [
+        "78th minute: Excellent first touch and finish for winning goal",
+        "34th minute: Good hold-up play leading to assist",
+        "12th minute: Missed clear chance from 8 yards"
+      ],
+      "overallRating": 8,
+      "recommendation": "Strong performer with proven goal-scoring ability. Would suit teams playing with quick transitions and direct play.",
+      "notes": "Looked sharp throughout the match. His movement in the box is exceptional and he's clearly confident in front of goal. Could be a valuable asset for any team needing a clinical finisher."
+    },
+    {
+      "id": 2,
+      "playerId": 5,
+      "playerName": "Lucas Silva",
+      "scoutName": "Maria Santos",
+      "date": "2024-11-22",
+      "matchDetails": {
+        "opponent": "Real Madrid",
+        "competition": "La Liga",
+        "result": "3-2 Win",
+        "minutesPlayed": 85,
+        "position": "Right Winger"
+      },
+      "ratings": {
+        "technical": 9,
+        "physical": 8,
+        "mental": 8,
+        "tactical": 7,
+        "finishing": 9,
+        "passing": 7,
+        "dribbling": 9,
+        "defending": 5,
+        "leadership": 6,
+        "workRate": 8
+      },
+      "strengths": [
+        "Exceptional pace and acceleration",
+        "Outstanding dribbling skills in tight spaces",
+        "Natural goal-scoring instinct",
+        "Good decision-making in final third"
+      ],
+      "weaknesses": [
+        "Needs to improve defensive tracking",
+        "Can be selfish in possession at times",
+        "Struggles against very physical defenders"
+      ],
+      "keyMoments": [
+        "23rd minute: Brilliant solo goal cutting in from the right",
+        "67th minute: Created assist with perfectly weighted cross",
+        "45th minute: Beat three defenders but shot saved"
+      ],
+      "overallRating": 9,
+      "recommendation": "Exceptional young talent with world-class potential. Ready for top-level football and would enhance any attacking system.",
+      "notes": "One of the most exciting young players I've seen. His pace and skill on the ball are remarkable. Still developing tactically but has all the tools to become a superstar."
+    },
+    {
+      "id": 3,
+      "playerId": 10,
+      "playerName": "Roberto Santos",
+      "scoutName": "Antonio López",
+      "date": "2024-11-18",
+      "matchDetails": {
+        "opponent": "Juventus",
+        "competition": "Serie A",
+        "result": "1-0 Win",
+        "minutesPlayed": 90,
+        "position": "Attacking Midfielder"
+      },
+      "ratings": {
+        "technical": 9,
+        "physical": 7,
+        "mental": 9,
+        "tactical": 9,
+        "finishing": 8,
+        "passing": 10,
+        "dribbling": 9,
+        "defending": 6,
+        "leadership": 8,
+        "workRate": 8
+      },
+      "strengths": [
+        "Exceptional passing range and accuracy",
+        "Excellent vision and game intelligence",
+        "Strong leadership qualities on the pitch",
+        "Versatile - can play multiple midfield roles"
+      ],
+      "weaknesses": [
+        "Could be more aggressive in defensive situations",
+        "Sometimes holds onto the ball too long",
+        "Pace is not his strongest attribute"
+      ],
+      "keyMoments": [
+        "56th minute: Stunning through ball that led to winning goal",
+        "29th minute: Dictated tempo with 15-pass move",
+        "71st minute: Almost scored with curling effort from 25 yards"
+      ],
+      "overallRating": 9,
+      "recommendation": "World-class playmaker who would improve any team's creativity. Perfect for possession-based systems.",
+      "notes": "A true artist with the ball. His passing is simply sublime and he sees passes that others don't. The type of player who makes everyone around him better."
+    }
+  ],
+  "reportTemplate": {
+    "id": null,
+    "playerId": null,
+    "playerName": "",
+    "scoutName": "",
+    "date": "",
+    "matchDetails": {
+      "opponent": "",
+      "competition": "",
+      "result": "",
+      "minutesPlayed": 0,
+      "position": ""
+    },
+    "ratings": {
+      "technical": 0,
+      "physical": 0,
+      "mental": 0,
+      "tactical": 0,
+      "finishing": 0,
+      "passing": 0,
+      "dribbling": 0,
+      "defending": 0,
+      "leadership": 0,
+      "workRate": 0
+    },
+    "strengths": [],
+    "weaknesses": [],
+    "keyMoments": [],
+    "overallRating": 0,
+    "recommendation": "",
+    "notes": ""
+  },
+  "ratingScale": {
+    "description": "All ratings are on a scale of 1-10",
+    "scale": {
+      "1-2": "Very Poor",
+      "3-4": "Poor",
+      "5-6": "Average",
+      "7-8": "Good",
+      "9-10": "Excellent"
+    }
+  },
+  "scoutingCategories": {
+    "technical": "Ball control, first touch, technique",
+    "physical": "Pace, strength, stamina, agility",
+    "mental": "Decision making, composure, concentration",
+    "tactical": "Positioning, game understanding, adaptability",
+    "finishing": "Goal scoring ability and composure in front of goal",
+    "passing": "Accuracy, range, and creativity of passes",
+    "dribbling": "Ability to beat opponents with the ball",
+    "defending": "Tackling, marking, defensive awareness",
+    "leadership": "Communication, influence on teammates",
+    "workRate": "Effort, commitment, pressing intensity"
+  },
+  "metadata": {
+    "totalReports": 3,
+    "lastUpdated": "2024-11-22",
+    "season": "2024-25"
+  }
+}

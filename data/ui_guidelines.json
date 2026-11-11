@@ -1,0 +1,315 @@
+{
+  "designSystem": {
+    "name": "GODDACK ANALITICA UI",
+    "version": "1.0",
+    "description": "ASE Tech data position simulation"
+  },
+  "colorPalette": {
+    "primary": {
+      "50": "#f0f9ff",
+      "100": "#e0f2fe",
+      "200": "#bae6fd",
+      "300": "#7dd3fc",
+      "400": "#38bdf8",
+      "500": "#0ea5e9",
+      "600": "#0284c7",
+      "700": "#0369a1",
+      "800": "#075985",
+      "900": "#0c4a6e"
+    },
+    "secondary": {
+      "50": "#f8fafc",
+      "100": "#f1f5f9",
+      "200": "#e2e8f0",
+      "300": "#cbd5e1",
+      "400": "#94a3b8",
+      "500": "#64748b",
+      "600": "#475569",
+      "700": "#334155",
+      "800": "#1e293b",
+      "900": "#0f172a"
+    },
+    "accent": {
+      "green": "#10b981",
+      "red": "#ef4444",
+      "yellow": "#f59e0b",
+      "purple": "#8b5cf6",
+      "orange": "#f97316"
+    },
+    "neutral": {
+      "white": "#ffffff",
+      "gray50": "#f9fafb",
+      "gray100": "#f3f4f6",
+      "gray200": "#e5e7eb",
+      "gray300": "#d1d5db",
+      "gray400": "#9ca3af",
+      "gray500": "#6b7280",
+      "gray600": "#4b5563",
+      "gray700": "#374151",
+      "gray800": "#1f2937",
+      "gray900": "#111827",
+      "black": "#000000"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "primary": "Inter, system-ui, sans-serif",
+      "secondary": "Roboto, sans-serif",
+      "monospace": "Fira Code, monospace"
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem",
+      "5xl": "3rem"
+    },
+    "fontWeight": {
+      "light": "300",
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700",
+      "extrabold": "800"
+    },
+    "lineHeight": {
+      "tight": "1.25",
+      "normal": "1.5",
+      "relaxed": "1.75"
+    }
+  },
+  "spacing": {
+    "xs": "0.25rem",
+    "sm": "0.5rem",
+    "md": "1rem",
+    "lg": "1.5rem",
+    "xl": "2rem",
+    "2xl": "3rem",
+    "3xl": "4rem"
+  },
+  "borderRadius": {
+    "sm": "0.25rem",
+    "md": "0.375rem",
+    "lg": "0.5rem",
+    "xl": "0.75rem",
+    "2xl": "1rem",
+    "full": "9999px"
+  },
+  "shadows": {
+    "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+    "base": "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
+    "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+    "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+    "xl": "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+  },
+  "components": {
+    "button": {
+      "primary": {
+        "backgroundColor": "#0ea5e9",
+        "color": "#ffffff",
+        "padding": "0.75rem 1.5rem",
+        "borderRadius": "0.375rem",
+        "fontSize": "0.875rem",
+        "fontWeight": "600",
+        "hover": {
+          "backgroundColor": "#0284c7"
+        }
+      },
+      "secondary": {
+        "backgroundColor": "#f1f5f9",
+        "color": "#334155",
+        "padding": "0.75rem 1.5rem",
+        "borderRadius": "0.375rem",
+        "fontSize": "0.875rem",
+        "fontWeight": "600",
+        "hover": {
+          "backgroundColor": "#e2e8f0"
+        }
+      },
+      "danger": {
+        "backgroundColor": "#ef4444",
+        "color": "#ffffff",
+        "padding": "0.75rem 1.5rem",
+        "borderRadius": "0.375rem",
+        "fontSize": "0.875rem",
+        "fontWeight": "600",
+        "hover": {
+          "backgroundColor": "#dc2626"
+        }
+      }
+    },
+    "card": {
+      "backgroundColor": "#ffffff",
+      "borderRadius": "0.5rem",
+      "boxShadow": "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
+      "border": "1px solid #e5e7eb",
+      "padding": "1.5rem"
+    },
+    "input": {
+      "backgroundColor": "#ffffff",
+      "border": "1px solid #d1d5db",
+      "borderRadius": "0.375rem",
+      "padding": "0.75rem 1rem",
+      "fontSize": "0.875rem",
+      "focus": {
+        "borderColor": "#0ea5e9",
+        "boxShadow": "0 0 0 3px rgba(14, 165, 233, 0.1)"
+      }
+    },
+    "table": {
+      "backgroundColor": "#ffffff",
+      "borderRadius": "0.5rem",
+      "border": "1px solid #e5e7eb",
+      "header": {
+        "backgroundColor": "#f9fafb",
+        "color": "#374151",
+        "fontWeight": "600",
+        "padding": "0.75rem 1rem"
+      },
+      "cell": {
+        "padding": "0.75rem 1rem",
+        "borderBottom": "1px solid #f3f4f6"
+      }
+    },
+    "badge": {
+      "success": {
+        "backgroundColor": "#dcfce7",
+        "color": "#166534",
+        "padding": "0.25rem 0.75rem",
+        "borderRadius": "9999px",
+        "fontSize": "0.75rem",
+        "fontWeight": "500"
+      },
+      "warning": {
+        "backgroundColor": "#fef3c7",
+        "color": "#92400e",
+        "padding": "0.25rem 0.75rem",
+        "borderRadius": "9999px",
+        "fontSize": "0.75rem",
+        "fontWeight": "500"
+      },
+      "error": {
+        "backgroundColor": "#fee2e2",
+        "color": "#991b1b",
+        "padding": "0.25rem 0.75rem",
+        "borderRadius": "9999px",
+        "fontSize": "0.75rem",
+        "fontWeight": "500"
+      }
+    }
+  },
+  "layout": {
+    "container": {
+      "maxWidth": "1200px",
+      "margin": "0 auto",
+      "padding": "0 1rem"
+    },
+    "sidebar": {
+      "width": "250px",
+      "backgroundColor": "#1e293b",
+      "color": "#ffffff"
+    },
+    "header": {
+      "height": "64px",
+      "backgroundColor": "#ffffff",
+      "borderBottom": "1px solid #e5e7eb"
+    },
+    "grid": {
+      "columns": {
+        "1": "repeat(1, minmax(0, 1fr))",
+        "2": "repeat(2, minmax(0, 1fr))",
+        "3": "repeat(3, minmax(0, 1fr))",
+        "4": "repeat(4, minmax(0, 1fr))"
+      },
+      "gap": "1rem"
+    }
+  },
+  "icons": {
+    "library": "Lucide React",
+    "size": {
+      "sm": "16px",
+      "md": "20px",
+      "lg": "24px",
+      "xl": "32px"
+    },
+    "common": [
+      "User",
+      "Users",
+      "Search",
+      "Filter",
+      "TrendingUp",
+      "TrendingDown",
+      "BarChart3",
+      "PieChart",
+      "Target",
+      "Award",
+      "Star",
+      "Eye",
+      "Edit",
+      "Trash2",
+      "Plus",
+      "Download",
+      "Upload",
+      "Settings",
+      "Menu",
+      "X"
+    ]
+  },
+  "charts": {
+    "colors": [
+      "#0ea5e9",
+      "#10b981",
+      "#f59e0b",
+      "#ef4444",
+      "#8b5cf6",
+      "#f97316",
+      "#06b6d4",
+      "#84cc16"
+    ],
+    "grid": {
+      "color": "#f3f4f6"
+    },
+    "axis": {
+      "color": "#6b7280",
+      "fontSize": "0.75rem"
+    }
+  },
+  "responsiveBreakpoints": {
+    "mobile": "320px",
+    "tablet": "768px",
+    "desktop": "1024px",
+    "large": "1200px"
+  },
+  "designPrinciples": [
+    "Clean and modern aesthetic",
+    "Data-driven visualizations",
+    "Intuitive navigation",
+    "Responsive design for all devices",
+    "High contrast for readability",
+    "Consistent spacing and typography",
+    "Professional color scheme suitable for sports analytics",
+    "Clear hierarchy and information architecture"
+  ],
+  "usageGuidelines": {
+    "dashboard": {
+      "layout": "Use a sidebar navigation with main content area",
+      "cards": "Group related information in cards with consistent padding",
+      "charts": "Use consistent colors and maintain readability",
+      "tables": "Include sorting, filtering, and search capabilities"
+    },
+    "playerProfiles": {
+      "layout": "Header with photo and basic info, followed by stats and attributes",
+      "ratings": "Use progress bars or circular indicators for attribute ratings",
+      "stats": "Group by categories (performance, physical, technical)"
+    },
+    "forms": {
+      "validation": "Use clear error messages and success states",
+      "layout": "Logical grouping of form fields",
+      "buttons": "Primary action should be visually prominent"
+    }
+  }
+}
