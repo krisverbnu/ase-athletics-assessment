@@ -14,6 +14,7 @@ import { AgeGroupsChart, AttributesRadar, GoalsByPositionChart, TeamsChart, Valu
 import { buildTrendRows } from '../utils/chartData';
 import RankedList from '../components/dashboard/RankedList';
 import StatTile from '../components/dashboard/StatTile';
+import ContractsTile from '../components/dashboard/ContractsTile';
 import DataQualityCard from '../components/dashboard/DataQualityCard';
 import { useApi } from '../hooks';
 import { getDashboardStats } from '../services/dashboardService';
@@ -27,17 +28,12 @@ export default function Dashboard() {
   const activeCount = countActive(filters);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Contracts measured from the data date (default) or from today's date
-  const fromToday = params.get('asOf') === 'today';
-  const today = new Date().toISOString().slice(0, 10);
-
   const filterKey = JSON.stringify(filtersToParams(filters));
   const { data: response, loading, error, reload } = useApi(
-    () => getDashboardStats({ ...filters, ...(fromToday && { asOf: today }) }),
-    [filterKey, fromToday],
+    () => getDashboardStats(filters),
+    [filterKey],
   );
 
-  // Changing filters keeps the date choice, and the other way round
   // Arriving from an "About the data" link: scroll to the panel once it has loaded
   const location = useLocation();
   useEffect(() => {
@@ -46,9 +42,8 @@ export default function Dashboard() {
     }
   }, [response, location.hash]);
 
-  const setFilters = (next) => setParams({ ...filtersToParams(next), ...(fromToday && { asOf: 'today' }) });
-  const setFromToday = (on) => setParams({ ...filtersToParams(filters), ...(on && { asOf: 'today' }) });
-  const clearAll = () => setParams(fromToday ? { asOf: 'today' } : {});
+  const setFilters = (next) => setParams(filtersToParams(next));
+  const clearAll = () => setParams({});
 
   return (
     <div className="flex flex-col gap-6">
@@ -60,19 +55,7 @@ export default function Dashboard() {
             <a href="#data-quality" className="font-medium text-primary-700 underline">About the data</a>
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Contract reference date switch */}
-          <div role="group" aria-label="Measure contracts from" className="flex items-center gap-2 text-sm">
-            <span className="text-secondary-600">Contracts from</span>
-            <div className="flex rounded-md bg-secondary-100 p-1">
-              {[[false, 'Data date'], [true, 'Today']].map(([value, text]) => (
-                <button key={text} type="button" aria-pressed={fromToday === value} onClick={() => setFromToday(value)}
-                  className={`rounded px-3 py-1.5 font-medium ${fromToday === value ? 'bg-white text-secondary-900 shadow-sm' : 'text-secondary-600 hover:text-secondary-900'}`}>
-                  {text}
-                </button>
-              ))}
-            </div>
-          </div>
+        <div>
           <Button variant={showFilters ? 'primary' : 'secondary'} icon={SlidersHorizontal}
             onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters}>
             Filters{activeCount > 0 && ` (${activeCount})`}
@@ -89,7 +72,7 @@ export default function Dashboard() {
         <Card><EmptyState title="No players match these filters" action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear filters</Button>} /></Card>
       )}
       {response && response.data.kpis.totalPlayers > 0 && (
-        <DashboardContent stats={response.data} asOf={response.meta.asOf} fromToday={fromToday} />
+        <DashboardContent stats={response.data} />
       )}
       {response && response.data.dataQuality && (
         <DataQualityCard quality={response.data.dataQuality} dataDate={formatDate(response.meta.dataDate)} />
@@ -98,8 +81,7 @@ export default function Dashboard() {
   );
 }
 
-function DashboardContent({ stats, asOf, fromToday }) {
-  const reference = fromToday ? 'today' : `the data date (${formatDate(asOf)})`;
+function DashboardContent({ stats }) {
   const { kpis } = stats;
   const mostValuable = stats.mostValuable[0];
   const topTrends = [...stats.marketValueTrends]
@@ -109,14 +91,16 @@ function DashboardContent({ stats, asOf, fromToday }) {
   return (
     <>
       {/* KPI cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Players" icon={Users} value={kpis.totalPlayers} detail={`Average age ${kpis.averageAge}`} />
         <StatTile label="Top scorer" icon={Goal} value={kpis.topScorer?.name ?? '–'}
           detail={kpis.topScorer ? `${kpis.topScorer.goals} goals · ${kpis.topScorer.team}` : null} />
         <StatTile label="Most valuable" icon={Coins} value={mostValuable?.name ?? 'No values'}
           detail={mostValuable ? `${formatMoney(mostValuable.marketValue)} · ${kpis.playersWithMarketValue} players valued` : 'Market values not available'} />
-        <StatTile label={fromToday ? 'Expiring (from today)' : 'Expiring contracts'} icon={CalendarClock} value={kpis.contractsExpiringWithin12Months}
-          detail={`Next 12 months · ${kpis.expiredContracts} expired`} />
+        {stats.contractStatus ? <ContractsTile status={stats.contractStatus} /> : (
+          <StatTile label="Expiring contracts" icon={CalendarClock} value={kpis.contractsExpiringWithin12Months}
+            detail={`Next 12 months · ${kpis.expiredContracts} expired`} />
+        )}
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -163,7 +147,7 @@ function DashboardContent({ stats, asOf, fromToday }) {
         <ChartCard title="Best value for money" subtitle="Goals + assists per €10K of weekly salary">
           <RankedList items={stats.bestValueForMoney} value={(p) => p.contributionsPer10k.toFixed(1)} />
         </ChartCard>
-        <ChartCard title="Contracts ending soon" subtitle={`Within 12 months of ${reference}`}>
+        <ChartCard title="Contracts ending soon" subtitle="Ending within 12 months of the data date (8 Jul 2025)">
           <RankedList items={stats.expiringContracts.slice(0, 5)} value={(p) => formatDate(p.contractEnd)}
             empty="No contracts end within 12 months." />
         </ChartCard>

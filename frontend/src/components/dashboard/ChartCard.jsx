@@ -5,7 +5,7 @@ import { Download } from 'lucide-react';
 
 export default function ChartCard({ title, subtitle, onExport, className = '', children }) {
   return (
-    <section className={`flex flex-col rounded-lg border border-secondary-200 bg-white p-6 shadow-sm ${className}`}>
+    <section className={`flex min-w-0 flex-col rounded-lg border border-secondary-200 bg-white p-6 shadow-sm ${className}`}>
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
           <h2 className="text-base font-semibold text-secondary-900">{title}</h2>

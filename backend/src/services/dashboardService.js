@@ -26,7 +26,21 @@ const CORE_ATTRIBUTES = ['pace', 'shooting', 'passing', 'dribbling', 'defending'
 const MIN_MINUTES_FOR_PER_90 = 900; // 10 full matches, so one lucky cameo doesn't top the table
 
 // Pure function: players in, numbers out. Easy to test without a database.
-function computeStats(players, asOfDate) {
+// How many contracts have already ended, and how many end within the next 12 months,
+// counted from a given reference date
+function contractCounts(players, fromDate) {
+  const from = new Date(fromDate);
+  const inOneYear = new Date(from);
+  inOneYear.setUTCFullYear(inOneYear.getUTCFullYear() + 1);
+  const ends = players.filter((p) => p.contractEnd).map((p) => new Date(p.contractEnd));
+  return {
+    date: fromDate,
+    expired: ends.filter((d) => d < from).length,
+    endingWithin12Months: ends.filter((d) => d >= from && d <= inOneYear).length,
+  };
+}
+
+function computeStats(players, asOfDate, todayDate = new Date().toISOString().slice(0, 10)) {
   const asOf = new Date(asOfDate);
   const inOneYear = new Date(asOf);
   inOneYear.setUTCFullYear(inOneYear.getUTCFullYear() + 1);
@@ -68,6 +82,11 @@ function computeStats(players, asOfDate) {
       topAssister: byAssists[0] ? { ...pick(byAssists[0]), assists: byAssists[0].assists } : null,
       expiredContracts: expired.length,
       contractsExpiringWithin12Months: expiringSoon.length,
+    },
+    // The same contract numbers seen from two dates, so nobody has to guess which one a figure uses
+    contractStatus: {
+      dataDate: contractCounts(players, DATA_DATE),
+      today: contractCounts(players, todayDate),
     },
     mostValuable: [...withValue]
       .sort((a, b) => b.marketValue - a.marketValue)
