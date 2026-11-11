@@ -13,11 +13,11 @@ async function create(req, res) {
 }
 
 async function update(req, res) {
-  res.json({ data: await reportService.updateReport(req.validated.params.id, req.body) });
+  res.json({ data: await reportService.updateReport(req.validated.params.id, req.body, req.user.id) });
 }
 
 async function remove(req, res) {
-  await reportService.deleteReport(req.validated.params.id);
+  await reportService.deleteReport(req.validated.params.id, req.user.id);
   res.status(204).end();
 }
 

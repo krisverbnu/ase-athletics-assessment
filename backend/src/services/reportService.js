@@ -48,7 +48,16 @@ async function createReport(body, scoutId) {
   });
 }
 
-async function updateReport(id, body) {
+// Anyone logged in can read every report, but only the scout who wrote a report
+// can change or delete it
+async function ensureOwner(id, userId) {
+  const report = await prisma.scoutReport.findUnique({ where: { id }, select: { scoutId: true } });
+  if (!report) throw new HttpError(404, 'Report not found.');
+  if (report.scoutId !== Number(userId)) throw new HttpError(403, 'You can only change your own reports.');
+}
+
+async function updateReport(id, body, userId) {
+  await ensureOwner(id, userId);
   if (body.playerId) await ensurePlayerExists(body.playerId);
   return prisma.scoutReport.update({
     where: { id },
@@ -57,7 +66,8 @@ async function updateReport(id, body) {
   });
 }
 
-async function deleteReport(id) {
+async function deleteReport(id, userId) {
+  await ensureOwner(id, userId);
   await prisma.scoutReport.delete({ where: { id } });
 }
 

@@ -13,6 +13,7 @@ const listParam = (name, description, example) => ({
 const numberParam = (name, description) => ({ name, in: 'query', description, schema: { type: 'number' } });
 
 const unauthorized = errorResponse('Missing or expired token', { error: { message: 'Please log in to continue.' } });
+const forbidden = errorResponse('Not your report', { error: { message: 'You can only change your own reports.' } });
 const notFound = errorResponse('Not found', { error: { message: 'Player not found.' } });
 const invalid = errorResponse('Invalid input', {
   error: { message: 'Some fields are invalid.', details: [{ field: 'age', message: '"age" must be a number' }] },
@@ -249,8 +250,8 @@ module.exports = {
     },
     '/reports/{id}': {
       get: { tags: ['Reports'], summary: 'One report', parameters: [idParam], responses: { 200: { description: 'Report' }, 401: unauthorized, 404: notFound } },
-      put: { tags: ['Reports'], summary: 'Update a report', parameters: [idParam], requestBody: { required: true, content: { 'application/json': { example: { overallRating: 9, recommendation: 'SIGN' } } } }, responses: { 200: { description: 'Updated' }, 400: invalid, 401: unauthorized, 404: notFound } },
-      delete: { tags: ['Reports'], summary: 'Delete a report', parameters: [idParam], responses: { 204: { description: 'Deleted' }, 401: unauthorized, 404: notFound } },
+      put: { tags: ['Reports'], summary: 'Update a report (only its author)', parameters: [idParam], requestBody: { required: true, content: { 'application/json': { example: { overallRating: 9, recommendation: 'SIGN' } } } }, responses: { 200: { description: 'Updated' }, 400: invalid, 401: unauthorized, 403: forbidden, 404: notFound } },
+      delete: { tags: ['Reports'], summary: 'Delete a report (only its author)', parameters: [idParam], responses: { 204: { description: 'Deleted' }, 401: unauthorized, 403: forbidden, 404: notFound } },
     },
   },
 };

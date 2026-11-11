@@ -9,6 +9,7 @@ import PlayerPicker from '../components/common/PlayerPicker';
 import { PositionBadge } from '../components/common/Badges';
 import { TextAreaField, TextField } from '../components/common/Field';
 import { ErrorState, Spinner } from '../components/common/States';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage, getFieldErrors } from '../services/api';
 import { getPlayer } from '../services/playerService';
@@ -95,6 +96,7 @@ export default function ReportForm() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { user } = useAuth();
   const [form, setForm] = useState(EMPTY);
   const [player, setPlayer] = useState(null);
   const [errors, setErrors] = useState({});
@@ -107,14 +109,20 @@ export default function ReportForm() {
   useEffect(() => {
     if (isEdit) {
       getReport(id)
-        .then((r) => { setForm(toForm(r)); setPlayer(r.player); setLoadState({ loading: false, error: null }); })
+        .then((r) => {
+          if (r.scout.id !== user?.id) {
+            setLoadState({ loading: false, error: `Only ${r.scout.name} can edit this report.` });
+            return;
+          }
+          setForm(toForm(r)); setPlayer(r.player); setLoadState({ loading: false, error: null });
+        })
         .catch((err) => setLoadState({ loading: false, error: getErrorMessage(err) }));
     } else if (presetPlayerId) {
       getPlayer(presetPlayerId)
         .then((p) => { setPlayer(p); setLoadState({ loading: false, error: null }); })
         .catch(() => setLoadState({ loading: false, error: null })); // just pick a player manually
     }
-  }, [id, isEdit, presetPlayerId]);
+  }, [id, isEdit, presetPlayerId, user?.id]);
 
   const field = (name) => ({
     value: form[name],

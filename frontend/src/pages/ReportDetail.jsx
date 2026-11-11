@@ -8,6 +8,7 @@ import Card from '../components/common/Card';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { PositionBadge, RecommendationBadge } from '../components/common/Badges';
 import { ErrorState, Spinner } from '../components/common/States';
+import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useApi } from '../hooks';
 import { getErrorMessage } from '../services/api';
@@ -34,6 +35,7 @@ export default function ReportDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { user } = useAuth();
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const { data: r, loading, error, reload } = useApi(() => getReport(id), [id]);
@@ -87,8 +89,11 @@ export default function ReportDetail() {
         </div>
         <div className="mt-6 flex flex-wrap gap-2 print:hidden">
           <Button variant="secondary" icon={Printer} onClick={() => window.print()}>Print / Save as PDF</Button>
-          <Link to={`/reports/${r.id}/edit`}><Button variant="secondary" icon={Pencil}>Edit</Button></Link>
-          <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>Delete</Button>
+          {/* Only the scout who wrote the report can change it (the API enforces this too) */}
+          {r.scout.id === user?.id && (<>
+            <Link to={`/reports/${r.id}/edit`}><Button variant="secondary" icon={Pencil}>Edit</Button></Link>
+            <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>Delete</Button>
+          </>)}
         </div>
       </Card>
 

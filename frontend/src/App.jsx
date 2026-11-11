@@ -1,18 +1,23 @@
 // The route map: which URL shows which page
+import { lazy } from 'react';
 import { Navigate, Route, Routes } from 'react-router';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
-import Compare from './pages/Compare';
-import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
-import PlayerDetail from './pages/PlayerDetail';
-import PlayerForm from './pages/PlayerForm';
-import Players from './pages/Players';
 import Register from './pages/Register';
-import ReportDetail from './pages/ReportDetail';
-import ReportForm from './pages/ReportForm';
-import Reports from './pages/Reports';
+
+// Pages behind the login are loaded only when first opened ("code splitting"), so the
+// login page doesn't wait for the chart library and every other page to download.
+// Layout shows a spinner while a page's code arrives (see the Suspense in Layout.jsx).
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Players = lazy(() => import('./pages/Players'));
+const PlayerDetail = lazy(() => import('./pages/PlayerDetail'));
+const PlayerForm = lazy(() => import('./pages/PlayerForm'));
+const Compare = lazy(() => import('./pages/Compare'));
+const Reports = lazy(() => import('./pages/Reports'));
+const ReportDetail = lazy(() => import('./pages/ReportDetail'));
+const ReportForm = lazy(() => import('./pages/ReportForm'));
 
 export default function App() {
   return (

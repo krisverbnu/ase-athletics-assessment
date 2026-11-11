@@ -130,8 +130,10 @@ export default function Reports() {
                   <p className="text-xs text-secondary-500">By {r.scout.name}</p>
                   <div className="flex gap-1">
                     <Link to={`/reports/${r.id}`} aria-label={`View report on ${r.player.name}`} className="rounded-md p-2 text-secondary-600 hover:bg-secondary-100"><Eye className="size-4" /></Link>
+                    {r.scout.id === user?.id && (<>
                     <Link to={`/reports/${r.id}/edit`} aria-label={`Edit report on ${r.player.name}`} className="rounded-md p-2 text-secondary-600 hover:bg-secondary-100"><Pencil className="size-4" /></Link>
                     <button type="button" onClick={() => setToDelete(r)} aria-label={`Delete report on ${r.player.name}`} className="rounded-md p-2 text-red-600 hover:bg-red-50"><Trash2 className="size-4" /></button>
+                    </>)}
                   </div>
                 </div>
               </Card>
