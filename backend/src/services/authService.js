@@ -18,7 +18,24 @@ function createToken(user) {
   });
 }
 
+// Optional: only let people with certain email domains sign up, e.g.
+// ALLOWED_EMAIL_DOMAINS=aseathletics.com. Empty (the default) means anyone can register,
+// which is how the assessment demo runs so reviewers can create accounts.
+function allowedDomains() {
+  return (process.env.ALLOWED_EMAIL_DOMAINS || '')
+    .split(',')
+    .map((d) => d.trim().toLowerCase().replace(/^@/, ''))
+    .filter(Boolean);
+}
+
 async function register({ name, email, password }) {
+  const domains = allowedDomains();
+  const domain = email.split('@').pop().toLowerCase();
+  if (domains.length && !domains.includes(domain)) {
+    const message = `Sign-up is limited to ${domains.map((d) => '@' + d).join(', ')} email addresses.`;
+    throw new HttpError(403, message, [{ field: 'email', message }]);
+  }
+
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new HttpError(409, 'An account with this email already exists.');
 

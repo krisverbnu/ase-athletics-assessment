@@ -107,7 +107,8 @@ cp frontend/.env.example frontend/.env
 | `backend/.env` | `DATABASE_URL` | Pooled Postgres connection string (used by the app) |
 | | `DIRECT_URL` | Direct Postgres connection string (used by migrations) |
 | | `JWT_SECRET` | Any long random string, for signing login tokens |
-| | `CLIENT_URL` | Frontend address allowed to call the API, e.g. `http://localhost:5173` |
+| | `CLIENT_URL` | Frontend address allowed to call the API, e.g. `http://localhost:5173` (comma-separate several) |
+| | `ALLOWED_EMAIL_DOMAINS` | Optional. Only these email domains can sign up, e.g. `aseathletics.com`. Leave empty to allow anyone |
 | `frontend/.env` | `VITE_API_URL` | API address, e.g. `http://localhost:5001` |
 
 **3. Create the tables and load the data**
@@ -130,11 +131,11 @@ cd frontend && npm run dev    # app on http://localhost:5173
 ## Tests and CI
 
 ```bash
-cd backend && npm test     # 33 tests
+cd backend && npm test     # 43 tests
 cd frontend && npm test    # 12 tests
 ```
 
-- **Backend:** the data merge (90 players, no duplicates, no invented values), dashboard maths, login protection, validation, player create/edit/delete, and report ownership. The database is replaced with a fake, so tests run in about 2 seconds with no network.
+- **Backend:** the data merge (90 players, no duplicates, no invented values), dashboard maths, login protection, validation, player create/edit/delete, report ownership, CORS, rate limiting and the sign-up domain rule. The database is replaced with a fake, so tests run in about 2 seconds with no network.
 - **Frontend:** URL filters, formatting, chart data, and the contracts card rendered as a user sees it.
 - **CI:** every push runs both test suites, the frontend lint and the production build on GitHub Actions.
 
@@ -226,14 +227,19 @@ Full details, with evidence for each decision: [`docs/data-quality.md`](docs/dat
 - Every input validated and unknown fields stripped; body size limited
 - Helmet security headers; CORS limited to the frontend's address
 - The same message for an unknown email and a wrong password, so the login form can't reveal who has an account
+- Rate limiting: 10 failed logins per account per 15 minutes (counted per account, so changing IP address doesn't help an attacker), and 5 sign-ups per connection per hour
+- Optional company-only sign-up: set `ALLOWED_EMAIL_DOMAINS=aseathletics.com` and only those emails can register. Left open here so reviewers can create accounts
 - Secrets only in environment variables, never in the repository
+
+**Known gap: who can change players.** Reports are protected by author, but players are shared data, so any logged-in scout can edit or delete any player. In a real club tool I'd add roles: scouts can add and edit players, only a head of scouting can delete them. For production I'd also make sign-up invite-only or company-domain only, with email verification.
 
 **Trade-off: token in localStorage.** The login token is stored in `localStorage` and sent as a header. That's simple and works across the frontend (Vercel) and API (Render), which are on different domains. The risk is that a cross-site scripting bug could read it. React escapes all rendered content and the app never injects raw HTML, which keeps that risk low. In production I'd serve both from the same domain and move the token to an `HttpOnly`, `Secure`, `SameSite` cookie, which JavaScript can't read at all. I didn't do that here because cross-domain cookies are increasingly blocked by browsers, and a broken login would be worse than a documented trade-off.
 
 ## What I'd do next
 
 - Same-domain deploy with `HttpOnly` cookie sessions
-- Roles (scout, head of scouting) with finer permissions
+- Roles (scout, head of scouting): only a head of scouting can delete players
+- Invite-only or company-domain sign-up with email verification
 - End-to-end tests (Playwright) running against a preview deploy
 - Import market values from a licensed data provider, with source and date per value
 - Saved searches and watch lists per scout
