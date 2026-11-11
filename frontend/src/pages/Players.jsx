@@ -3,7 +3,7 @@
 // so the back button works, refreshing keeps your view, and a view can be shared as a link.
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowDown, ArrowUp, ArrowUpDown, Download, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitCompare, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Highlight from '../components/common/Highlight';
@@ -21,6 +21,7 @@ import { countActive, filtersToParams, loadSavedFilters, readFilters, saveFilter
 import { formatDate, formatMoney } from '../utils/format';
 
 const PAGE_SIZE = 25;
+const MAX_COMPARE = 4;
 const COLUMNS = [
   { key: 'name', label: 'Player' },
   { key: 'position', label: 'Position' },
@@ -34,6 +35,15 @@ const COLUMNS = [
 
 // Text columns start A to Z; number columns start biggest first (scouts want top scorers first)
 const defaultOrder = (key) => (['name', 'team', 'position'].includes(key) ? 'asc' : 'desc');
+
+// The tick box used in both the table and the phone cards
+function CompareBox({ player, checked, disabled, onToggle }) {
+  return (
+    <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(player.id)}
+      onClick={(e) => e.stopPropagation()} aria-label={`Select ${player.name} for comparison`}
+      className="size-4 cursor-pointer accent-primary-700 disabled:cursor-not-allowed" />
+  );
+}
 
 export default function Players() {
   const navigate = useNavigate();
@@ -49,6 +59,11 @@ export default function Players() {
   const [searchText, setSearchText] = useState(q);
   const [showFilters, setShowFilters] = useState(activeCount > 0);
   const [exporting, setExporting] = useState(false);
+  const [compareIds, setCompareIds] = useState([]); // players ticked for comparison
+
+  const toggleCompare = (id) => setCompareIds((ids) => (ids.includes(id)
+    ? ids.filter((x) => x !== id)
+    : ids.length < MAX_COMPARE ? [...ids, id] : ids));
 
   // Write a new view into the URL. Anything not mentioned in `changes` stays as it is.
   const setView = (changes) => {
@@ -204,6 +219,7 @@ export default function Players() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-700">
                   <tr>
+                    <th scope="col" className="w-10 py-3 pl-4"><span className="sr-only">Compare</span></th>
                     {COLUMNS.map((c) => (
                       <th key={c.key} scope="col" className={`px-4 py-3 font-semibold ${c.align === 'right' ? 'text-right' : ''}`}
                         aria-sort={sort === c.key ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}>
@@ -218,6 +234,10 @@ export default function Players() {
                 <tbody className="divide-y divide-secondary-100">
                   {data.data.map((p) => (
                     <tr key={p.id} onClick={() => navigate(`/players/${p.id}`)} className="cursor-pointer hover:bg-primary-50/60">
+                      <td className="py-3 pl-4">
+                        <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
+                          disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />
+                      </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <Avatar name={p.name} size="sm" />
@@ -247,8 +267,12 @@ export default function Players() {
             {/* Phones: one card per player */}
             <ul className="divide-y divide-secondary-100 md:hidden">
               {data.data.map((p) => (
-                <li key={p.id}>
-                  <Link to={`/players/${p.id}`} className="flex items-center gap-3 px-4 py-4 active:bg-secondary-50">
+                <li key={p.id} className="flex items-center">
+                  <label className="flex items-center self-stretch pl-4">
+                    <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
+                      disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />
+                  </label>
+                  <Link to={`/players/${p.id}`} className="flex flex-1 items-center gap-3 px-4 py-4 active:bg-secondary-50">
                     <Avatar name={p.name} size="sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-secondary-900"><Highlight text={p.name} query={q} /></p>
@@ -270,6 +294,23 @@ export default function Players() {
           </>
         )}
       </Card>
+
+      {/* Floating bar once players are ticked */}
+      {compareIds.length > 0 && (
+        <div className="sticky bottom-4 z-20 mx-auto flex w-full max-w-xl items-center justify-between gap-3 rounded-lg bg-secondary-800 px-4 py-3 text-white shadow-xl">
+          <p className="text-sm">
+            <span className="font-semibold">{compareIds.length}</span> of {MAX_COMPARE} selected
+            {compareIds.length < 2 && <span className="text-secondary-300"> · pick at least 2</span>}
+          </p>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={() => setCompareIds([])} className="px-2 text-sm text-secondary-300 hover:text-white">Clear</button>
+            <Link to={`/compare?ids=${compareIds.join(',')}`} aria-disabled={compareIds.length < 2}
+              onClick={(e) => compareIds.length < 2 && e.preventDefault()}>
+              <Button icon={GitCompare} size="sm" disabled={compareIds.length < 2}>Compare</Button>
+            </Link>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

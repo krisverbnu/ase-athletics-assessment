@@ -42,3 +42,13 @@ export function SelectField({ label, error, hint, required, options, placeholder
     </Wrapper>
   );
 }
+
+export function TextAreaField({ label, error, hint, required, rows = 4, ...props }) {
+  const id = useId();
+  return (
+    <Wrapper id={id} label={label} error={error} hint={hint} required={required}>
+      <textarea id={id} rows={rows} required={required} aria-invalid={!!error}
+        className={`${base} resize-y ${error ? 'border-red-500' : 'border-secondary-300'}`} {...props} />
+    </Wrapper>
+  );
+}

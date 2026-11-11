@@ -43,3 +43,22 @@ export const POSITIONS = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
 
 // Per-90 output: goals + assists for every 90 minutes played
 export const per90 = (count, minutes) => (minutes > 0 ? ((count / minutes) * 90).toFixed(2) : '0.00');
+
+// Scouting recommendations: traffic-light colours, always shown with the word too
+export const RECOMMENDATIONS = {
+  SIGN: { label: 'Sign', style: 'bg-emerald-100 text-emerald-800' },
+  MONITOR: { label: 'Monitor', style: 'bg-amber-100 text-amber-800' },
+  PASS: { label: 'Pass', style: 'bg-red-100 text-red-800' },
+};
+
+// ASE's scale from scout_report.json: what each 1-10 rating means
+export function ratingLabel(value) {
+  if (value <= 2) return 'Very poor';
+  if (value <= 4) return 'Poor';
+  if (value <= 6) return 'Average';
+  if (value <= 8) return 'Good';
+  return 'Excellent';
+}
+
+// The six attributes every player has (outfield and goalkeepers)
+export const CORE_ATTRIBUTES = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];

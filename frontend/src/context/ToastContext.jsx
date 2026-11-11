@@ -24,7 +24,7 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={value}>
       {children}
       {/* aria-live: screen readers announce new messages */}
-      <div aria-live="polite" className="fixed bottom-4 right-4 z-50 flex w-[calc(100%-2rem)] max-w-sm flex-col gap-2">
+      <div aria-live="polite" className="fixed bottom-4 right-4 z-50 flex print:hidden w-[calc(100%-2rem)] max-w-sm flex-col gap-2">
         {toasts.map((t) => (
           <div key={t.id} role="status"
             className="flex items-start gap-3 rounded-lg border border-secondary-200 bg-white p-4 shadow-lg">

@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, ClipboardPlus, GitCompare, Pencil, Trash2 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import ConfirmDialog from '../components/common/ConfirmDialog';
-import { Avatar, PositionBadge } from '../components/common/Badges';
+import { Avatar, PositionBadge, RecommendationBadge } from '../components/common/Badges';
 import { EmptyState, ErrorState, Spinner } from '../components/common/States';
 import AttributeBars from '../components/players/AttributeBars';
 import { MonthlyFormChart, ValueHistoryChart } from '../components/players/MiniCharts';
@@ -33,7 +33,6 @@ function InfoRow({ label, value }) {
   );
 }
 
-const RECOMMENDATION_STYLES = { SIGN: 'bg-emerald-100 text-emerald-800', MONITOR: 'bg-amber-100 text-amber-800', PASS: 'bg-red-100 text-red-800' };
 
 export default function PlayerDetail() {
   const { id } = useParams();
@@ -87,7 +86,9 @@ export default function PlayerDetail() {
               </p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/compare?ids=${p.id}`}><Button variant="secondary" icon={GitCompare}>Compare</Button></Link>
+            <Link to={`/reports/new?playerId=${p.id}`}><Button variant="secondary" icon={ClipboardPlus}>Write report</Button></Link>
             <Link to={`/players/${p.id}/edit`}><Button variant="secondary" icon={Pencil}>Edit</Button></Link>
             <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>Delete</Button>
           </div>
@@ -153,12 +154,12 @@ export default function PlayerDetail() {
             {p.reports.map((r) => (
               <li key={r.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-secondary-900">vs {r.opponent} · {formatDate(r.matchDate)}</p>
+                  <Link to={`/reports/${r.id}`} className="text-sm font-semibold text-secondary-900 hover:text-primary-700">vs {r.opponent} · {formatDate(r.matchDate)}</Link>
                   <p className="text-xs text-secondary-500">By {r.scout.name}{r.competition ? ` · ${r.competition}` : ''}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold tabular-nums">{r.overallRating}/10</span>
-                  <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${RECOMMENDATION_STYLES[r.recommendation]}`}>{r.recommendation}</span>
+                  <RecommendationBadge value={r.recommendation} />
                 </div>
               </li>
             ))}

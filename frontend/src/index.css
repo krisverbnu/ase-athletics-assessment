@@ -48,6 +48,9 @@
 @layer base {
   body {
     @apply bg-secondary-50 text-secondary-800 antialiased;
+    /* Keep coloured bars and badges when printing / saving as PDF */
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
   /* Visible keyboard focus everywhere (accessibility) */
   :focus-visible {

@@ -1,4 +1,4 @@
-import { initials, POSITION_STYLES } from '../../utils/format';
+import { initials, POSITION_STYLES, RECOMMENDATIONS } from '../../utils/format';
 
 export function PositionBadge({ position }) {
   return (
@@ -16,4 +16,10 @@ export function Avatar({ name, size = 'md' }) {
       {initials(name)}
     </div>
   );
+}
+
+export function RecommendationBadge({ value }) {
+  const rec = RECOMMENDATIONS[value];
+  if (!rec) return null;
+  return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${rec.style}`}>{rec.label}</span>;
 }

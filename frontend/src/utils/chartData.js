@@ -11,3 +11,14 @@ export function buildTrendRows(trends) {
   }
   return [...byTime.values()].sort((a, b) => a.time - b.time);
 }
+
+// Same idea for any per-player series: series = [{ name, points: [{ time, value }] }]
+export function mergeSeries(series) {
+  const byTime = new Map();
+  for (const s of series) {
+    for (const point of s.points) {
+      byTime.set(point.time, { ...(byTime.get(point.time) || { time: point.time }), [s.name]: point.value });
+    }
+  }
+  return [...byTime.values()].sort((a, b) => a.time - b.time);
+}

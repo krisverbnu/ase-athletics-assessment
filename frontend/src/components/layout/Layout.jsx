@@ -42,9 +42,9 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen lg:pl-[250px]">
+    <div className="min-h-screen lg:pl-[250px] print:pl-0">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 hidden w-[250px] flex-col bg-secondary-800 p-4 lg:flex">
+      <aside className="fixed inset-y-0 left-0 hidden w-[250px] flex-col bg-secondary-800 p-4 lg:flex print:hidden">
         <Logo />
         {nav}
       </aside>
@@ -64,7 +64,7 @@ export default function Layout() {
       )}
 
       {/* Header (guidelines: 64 px, white, bottom border) */}
-      <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-8">
+      <header className="sticky top-0 z-30 flex h-16 print:hidden items-center justify-between border-b border-gray-200 bg-white px-4 lg:px-8">
         <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu"
           className="-ml-2 rounded-md p-2 text-secondary-700 hover:bg-secondary-100 lg:hidden">
           <Menu className="size-6" />
