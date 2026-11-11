@@ -1,0 +1,193 @@
+// ASE Athletics: database schema
+// Each "model" becomes a table in PostgreSQL. Prisma reads this file to
+// create the tables (migrations) and to generate the code we query them with.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL") // pooled connection, used by the app
+  directUrl = env("DIRECT_URL")   // direct connection, used for migrations
+}
+
+// Enums: the database only accepts these exact values (validation at DB level)
+enum Position {
+  Goalkeeper
+  Defender
+  Midfielder
+  Forward
+}
+
+enum Recommendation {
+  SIGN
+  MONITOR
+  PASS
+}
+
+// ---------- Users (login accounts, also the scouts who write reports) ----------
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique // no two accounts with the same email
+  passwordHash String        // bcrypt hash, never the real password
+  name         String
+  createdAt    DateTime      @default(now())
+  reports      ScoutReport[] // one user can write many reports
+
+  @@map("users")
+}
+
+// ---------- Players (the core table) ----------
+model Player {
+  id               Int      @id @default(autoincrement())
+  sourceId         String?  @unique // where it came from, e.g. "main:2" or "detailed:PL1"
+  name             String
+  position         Position
+  detailedPosition String?  // the original, e.g. "CAM" or "Centre Back"
+  age              Int
+  team             String
+  league           String?
+  nationality      String
+  height           Int?     // cm
+  weight           Int?     // kg
+  preferredFoot    String?
+  jerseyNumber     Int?
+  imageUrl         String?
+
+  // Season stats (2024-25)
+  appearances       Int    @default(0)
+  goals             Int    @default(0)
+  assists           Int    @default(0)
+  minutesPlayed     Int    @default(0)
+  yellowCards       Int    @default(0)
+  redCards          Int    @default(0)
+  passAccuracy      Float?
+  shotsOnTarget     Int?   // outfield players only
+  totalShots        Int?
+  dribblesCompleted Int?
+  tacklesWon        Int?
+  aerialDuelsWon    Int?
+  saves             Int?   // goalkeepers only
+  cleanSheets       Int?
+  goalsConceded     Int?
+
+  // Contract and market
+  contractSalary Int?      // weekly, EUR (assumed, see README)
+  contractEnd    DateTime? @db.Date
+  marketValue    Int?      // EUR; only some players have one
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Related tables
+  attributes   PlayerAttributes?
+  marketValues MarketValue[]
+  monthlyForm  MonthlyForm[]
+  reports      ScoutReport[]
+
+  // Indexes make search and filters fast on these columns
+  @@index([name])
+  @@index([team])
+  @@index([nationality])
+  @@index([position])
+  @@map("players")
+}
+
+// ---------- Player attributes (ratings out of 100), one row per player ----------
+model PlayerAttributes {
+  playerId    Int  @id
+  pace        Int
+  shooting    Int
+  passing     Int
+  dribbling   Int
+  defending   Int
+  physical    Int
+  positioning Int?
+  finishing   Int? // outfield
+  crossing    Int?
+  longShots   Int?
+  diving      Int? // goalkeepers
+  handling    Int?
+  kicking     Int?
+  reflexes    Int?
+
+  // onDelete: Cascade = delete the player and this row goes too
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@map("player_attributes")
+}
+
+// ---------- Market value history (for the "value over time" chart) ----------
+model MarketValue {
+  id       Int      @id @default(autoincrement())
+  playerId Int
+  date     DateTime @db.Date
+  value    Int      // EUR
+  source   String?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, date]) // one value per player per date
+  @@map("market_value_history")
+}
+
+// ---------- Month-by-month form (for "goals and assists over time") ----------
+model MonthlyForm {
+  id            Int      @id @default(autoincrement())
+  playerId      Int
+  month         DateTime @db.Date // first day of the month
+  appearances   Int
+  goals         Int
+  assists       Int
+  averageRating Float?
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  @@unique([playerId, month])
+  @@map("player_monthly_form")
+}
+
+// ---------- Scouting reports ----------
+model ScoutReport {
+  id            Int      @id @default(autoincrement())
+  playerId      Int
+  scoutId       Int
+  matchDate     DateTime @db.Date
+  opponent      String
+  competition   String?
+  venue         String?
+  result        String?
+  minutesPlayed Int?
+  positionPlayed String?
+
+  // Ratings, 1 to 10 (range checked by the API's validation)
+  technical  Int
+  physical   Int
+  mental     Int
+  tactical   Int
+  finishing  Int
+  passing    Int
+  dribbling  Int
+  defending  Int
+  leadership Int
+  workRate   Int
+
+  overallRating  Int
+  strengths      String[]       // a list of short points
+  weaknesses     String[]
+  keyMoments     String[]
+  recommendation Recommendation // SIGN, MONITOR or PASS
+  summary        String?        // the scout's written verdict
+  notes          String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  player Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  scout  User   @relation(fields: [scoutId], references: [id])
+
+  @@index([playerId])
+  @@index([scoutId])
+  @@map("scout_reports")
+}
