@@ -2,7 +2,7 @@
 // The best value in each row is highlighted (higher is better, unless the row says otherwise).
 export default function CompareTable({ players, rows }) {
   return (
-    <div className="overflow-x-auto">
+    <div className="relative overflow-x-auto">
       <table className="w-full min-w-[480px] text-sm">
         <thead>
           <tr className="border-b border-secondary-200">

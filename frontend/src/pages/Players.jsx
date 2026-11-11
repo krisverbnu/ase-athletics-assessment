@@ -39,9 +39,13 @@ const defaultOrder = (key) => (['name', 'team', 'position'].includes(key) ? 'asc
 // The tick box used in both the table and the phone cards
 function CompareBox({ player, checked, disabled, onToggle }) {
   return (
-    <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(player.id)}
-      onClick={(e) => e.stopPropagation()} aria-label={`Select ${player.name} for comparison`}
-      className="size-4 cursor-pointer accent-primary-700 disabled:cursor-not-allowed" />
+    // The padding around the box makes a ~40px tap target on phones; the negative margin
+    // keeps it looking the same size. stopPropagation stops the tap opening the player.
+    <label className="-m-3 inline-flex cursor-pointer p-3" onClick={(e) => e.stopPropagation()}>
+      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(player.id)}
+        aria-label={`Select ${player.name} for comparison`}
+        className="size-4 cursor-pointer accent-primary-700 disabled:cursor-not-allowed" />
+    </label>
   );
 }
 
@@ -215,7 +219,7 @@ export default function Players() {
         {data && data.data.length > 0 && (
           <>
             {/* Desktop and tablet: table */}
-            <div className="hidden overflow-x-auto md:block">
+            <div className="relative hidden overflow-x-auto md:block">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-700">
                   <tr>
@@ -269,17 +273,18 @@ export default function Players() {
             <ul className="divide-y divide-secondary-100 md:hidden">
               {data.data.map((p) => (
                 <li key={p.id} className="flex items-center">
-                  <label className="flex items-center self-stretch pl-4">
+                  <div className="flex items-center self-stretch pl-4">
                     <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
                       disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />
-                  </label>
-                  <Link to={`/players/${p.id}`} className="flex flex-1 items-center gap-3 px-4 py-4 active:bg-secondary-50">
+                  </div>
+                  {/* min-w-0 lets long names shorten with "..." instead of pushing the badge off screen */}
+                  <Link to={`/players/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 active:bg-secondary-50">
                     <Avatar name={p.name} size="sm" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-semibold text-secondary-900"><Highlight text={p.name} query={q} /></p>
                       <p className="truncate text-xs text-secondary-500"><Highlight text={p.team} query={q} /> · {p.age} yrs</p>
                     </div>
-                    <div className="text-right">
+                    <div className="shrink-0 text-right">
                       <PositionBadge position={p.position} />
                       <p className="mt-1 text-xs text-secondary-600">{p.goals} G · {p.assists} A</p>
                     </div>
@@ -301,9 +306,9 @@ export default function Players() {
         <div className="sticky bottom-4 z-20 mx-auto flex w-full max-w-xl items-center justify-between gap-3 rounded-lg bg-secondary-800 px-4 py-3 text-white shadow-xl">
           <p className="text-sm">
             <span className="font-semibold">{compareIds.length}</span> of {MAX_COMPARE} selected
-            {compareIds.length < 2 && <span className="text-secondary-300"> · pick at least 2</span>}
+            {compareIds.length < 2 && <span className="text-secondary-300 max-[25rem]:hidden"> · pick at least 2</span>}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <button type="button" onClick={() => setCompareIds([])} className="px-2 text-sm text-secondary-300 hover:text-white">Clear</button>
             <Link to={`/compare?ids=${compareIds.join(',')}`} aria-disabled={compareIds.length < 2}
               onClick={(e) => compareIds.length < 2 && e.preventDefault()}>
