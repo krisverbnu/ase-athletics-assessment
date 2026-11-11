@@ -254,8 +254,9 @@ export default function Players() {
                       <td className="px-4 py-3"><Highlight text={p.team} query={q} /></td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.goals}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.assists}</td>
-                      <td className={`px-4 py-3 text-right tabular-nums ${p.marketValue == null ? 'text-secondary-400' : ''}`}>
-                        {p.marketValue == null ? 'n/a' : formatMoney(p.marketValue)}
+                      <td className={`px-4 py-3 text-right tabular-nums ${p.marketValue == null ? 'text-secondary-400' : ''}`}
+                        title={p.marketValue == null ? 'Not provided in the source data' : undefined}>
+                        {p.marketValue == null ? <>n/a<span className="sr-only"> (not provided in the source data)</span></> : formatMoney(p.marketValue)}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">{formatDate(p.contractEnd)}</td>
                     </tr>

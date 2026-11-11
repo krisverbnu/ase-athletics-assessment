@@ -100,6 +100,25 @@ function computeStats(players, asOfDate) {
     marketValueTrends: players
       .filter((p) => p.marketValues?.length > 1)
       .map((p) => ({ ...pick(p), history: p.marketValues.map((v) => ({ date: v.date, value: v.value })) })),
+    dataQuality: dataCoverage(players),
+  };
+}
+
+// How complete the data is: for each field, how many of the (filtered) players have it.
+// Shown on the dashboard so users know which numbers rest on partial data.
+function dataCoverage(players) {
+  const has = (test) => players.filter(test).length;
+  const formCount = (p) => p._count?.monthlyForm ?? p.monthlyForm?.length ?? 0;
+  return {
+    totalPlayers: players.length,
+    coverage: [
+      { key: 'attributes', label: 'Attribute ratings', count: has((p) => p.attributes) },
+      { key: 'contractEnd', label: 'Contract end date', count: has((p) => p.contractEnd) },
+      { key: 'contractSalary', label: 'Salary', count: has((p) => p.contractSalary != null) },
+      { key: 'marketValue', label: 'Market value', count: has((p) => p.marketValue != null) },
+      { key: 'valueHistory', label: 'Value history', count: has((p) => p.marketValues?.length > 1) },
+      { key: 'monthlyForm', label: 'Month-by-month form', count: has((p) => formCount(p) > 0) },
+    ],
   };
 }
 
@@ -107,7 +126,11 @@ async function getDashboardStats(query) {
   const { asOf = DATA_DATE, ...filters } = query;
   const players = await prisma.player.findMany({
     where: buildWhere(filters),
-    include: { attributes: true, marketValues: { orderBy: { date: 'asc' } } },
+    include: {
+      attributes: true,
+      marketValues: { orderBy: { date: 'asc' } },
+      _count: { select: { monthlyForm: true } }, // just the number of rows, not the rows themselves
+    },
   });
   const asOfIso = new Date(asOf).toISOString().slice(0, 10);
   return { data: computeStats(players, asOfIso), meta: { asOf: asOfIso, dataDate: DATA_DATE } };

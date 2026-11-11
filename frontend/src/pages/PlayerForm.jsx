@@ -164,9 +164,10 @@ export default function PlayerForm() {
 
       <Card title="Contract & market">
         <div className="grid gap-4 sm:grid-cols-3">
-          <TextField label="Weekly salary (€)" type="number" min="0" {...field('contractSalary')} />
+          <TextField label="Weekly salary (€)" type="number" min="0" {...field('contractSalary')} hint="Weekly, in euros." />
           <TextField label="Contract end" type="date" {...field('contractEnd')} />
-          <TextField label="Market value (€)" type="number" min="0" {...field('marketValue')} hint="Leave empty if unknown." />
+          <TextField label="Market value (€)" type="number" min="0" {...field('marketValue')}
+            hint="Missing from the source data for most players. Add it if you know it; otherwise leave it empty (never 0)." />
         </div>
       </Card>
 

@@ -24,13 +24,26 @@ function Stat({ label, value, hint }) {
   );
 }
 
-function InfoRow({ label, value }) {
+// One label/value line. `note` is small print under the value (e.g. where it came from).
+function InfoRow({ label, value, note }) {
   return (
     <div className="flex justify-between gap-4 py-2 text-sm">
       <dt className="text-secondary-500">{label}</dt>
-      <dd className="text-right font-medium text-secondary-900">{value ?? 'Not available'}</dd>
+      <dd className="text-right">
+        <span className={value == null ? 'text-secondary-400' : 'font-medium text-secondary-900'}>{value ?? 'Not available'}</span>
+        {note && <span className="block text-xs font-normal text-secondary-500">{note}</span>}
+      </dd>
     </div>
   );
+}
+
+// Where the market value came from: the source data, a user, or nowhere yet
+function marketValueNote(p) {
+  if (p.marketValue == null) {
+    return <>Not in the source data · <Link to={`/players/${p.id}/edit`} className="text-primary-700 underline">add it</Link></>;
+  }
+  const latest = p.marketValues.at(-1);
+  return latest ? `ASE detailed data · valued ${formatDate(latest.date)}` : 'Entered in this app';
 }
 
 
@@ -129,13 +142,16 @@ export default function PlayerDetail() {
         </Card>
         <Card title="Contract & market">
           <dl className="divide-y divide-secondary-100">
-            <InfoRow label="Market value" value={p.marketValue != null ? formatMoney(p.marketValue) : null} />
-            <InfoRow label="Weekly salary" value={p.contractSalary != null ? formatMoney(p.contractSalary) : null} />
+            <InfoRow label="Market value" value={p.marketValue != null ? formatMoney(p.marketValue) : null} note={marketValueNote(p)} />
+            <InfoRow label="Weekly salary" value={p.contractSalary != null ? formatMoney(p.contractSalary) : null}
+              note={p.contractSalary != null ? 'Unit assumed: weekly, EUR' : null} />
             <InfoRow label="Contract until" value={formatDate(p.contractEnd)} />
             <InfoRow label="Preferred foot" value={p.preferredFoot} />
             <InfoRow label="Height / weight" value={p.height ? `${p.height} cm / ${p.weight} kg` : null} />
           </dl>
-          <p className="mt-3 text-xs text-secondary-500">Salary assumed weekly in EUR (unit not stated in the source data).</p>
+          <p className="mt-3 text-xs text-secondary-500">
+            Figures from the 2024-25 source data. <Link to="/dashboard#data-quality" className="underline">About the data</Link>
+          </p>
         </Card>
       </div>
 
