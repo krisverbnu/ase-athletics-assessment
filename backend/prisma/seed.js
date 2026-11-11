@@ -404,7 +404,12 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error('Seed failed:', error);
-  process.exit(1);
-});
+// Only run when called as a script (npm run db:seed), not when a test imports this file
+if (require.main === module) {
+  main().catch((error) => {
+    console.error('Seed failed:', error);
+    process.exit(1);
+  });
+}
+
+module.exports = { buildSeedData, monthsToDates, recommendationFromRating };
