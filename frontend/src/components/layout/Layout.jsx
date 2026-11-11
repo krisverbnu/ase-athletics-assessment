@@ -1,10 +1,10 @@
 // The app frame: dark sidebar (guidelines: 250 px, #1e293b), white header, page content.
 // On phones the sidebar hides behind a menu button.
 import { Suspense, useState } from 'react';
-import { NavLink, Outlet } from 'react-router';
+import { NavLink, Outlet, useLocation } from 'react-router';
 import { BarChart3, ClipboardList, GitCompare, LogOut, Menu, Users, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { Spinner } from '../common/States';
+import { PageSkeleton } from '../common/States';
 
 const NAV = [
   { to: '/dashboard', label: 'Dashboard', icon: BarChart3 },
@@ -26,6 +26,7 @@ function Logo() {
 }
 
 export default function Layout() {
+  const { pathname } = useLocation();
   const { user, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -85,8 +86,11 @@ export default function Layout() {
 
       <main className="mx-auto max-w-[1200px] px-4 py-6 lg:px-8 lg:py-8">
         {/* While a page's code is downloading, show a spinner inside the layout (sidebar stays put) */}
-        <Suspense fallback={<Spinner />}>
-          <Outlet />
+        <Suspense fallback={<PageSkeleton />}>
+          {/* A quick fade each time you open a different page */}
+          <div key={pathname} className="motion-safe:animate-fade-in">
+            <Outlet />
+          </div>
         </Suspense>
       </main>
     </div>

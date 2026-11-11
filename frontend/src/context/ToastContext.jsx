@@ -27,7 +27,7 @@ export function ToastProvider({ children }) {
       <div aria-live="polite" className="fixed bottom-4 right-4 z-50 flex print:hidden w-[calc(100%-2rem)] max-w-sm flex-col gap-2">
         {toasts.map((t) => (
           <div key={t.id} role="status"
-            className="flex items-start gap-3 rounded-lg border border-secondary-200 bg-white p-4 shadow-lg">
+            className="flex items-start gap-3 rounded-lg border border-secondary-200 bg-white p-4 shadow-lg motion-safe:animate-toast-in">
             {t.type === 'success'
               ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden />
               : <XCircle className="mt-0.5 size-5 shrink-0 text-red-600" aria-hidden />}

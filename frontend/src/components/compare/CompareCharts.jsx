@@ -5,11 +5,9 @@ import {
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { mergeSeries } from '../../utils/chartData';
+import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { CORE_ATTRIBUTES } from '../../utils/format';
 
-const AXIS = { fill: '#6b7280', fontSize: 12 };
-const TOOLTIP = { contentStyle: { borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13 } };
-const LEGEND = { wrapperStyle: { fontSize: 13, paddingTop: 8 }, iconType: 'circle', iconSize: 10 };
 const monthLabel = (t) => new Date(t).toLocaleDateString('en-GB', { month: 'short', year: '2-digit', timeZone: 'UTC' });
 const fullDate = (t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 
@@ -23,10 +21,10 @@ export function AttributeRadar({ players }) {
   return (
     <ResponsiveContainer width="100%" height={360}>
       <RadarChart data={rows} outerRadius="72%">
-        <PolarGrid stroke="#e5e7eb" />
+        <PolarGrid stroke="#e2e8f0" />
         <PolarAngleAxis dataKey="attribute" tick={{ ...AXIS, fill: '#475569' }} />
         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
-        <Tooltip {...TOOLTIP} />
+        <Tooltip {...TOOLTIP} cursor={false} />
         <Legend {...LEGEND} />
         {players.map((p) => (
           <Radar key={p.id} name={p.name} dataKey={p.name} stroke={p.color} fill={p.color} fillOpacity={0.08}
@@ -43,11 +41,11 @@ export function TimeLines({ series, valueFormat = (v) => v, valueLabel }) {
   return (
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
-        <CartesianGrid stroke="#f3f4f6" vertical={false} />
+        <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="time" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={monthLabel}
-          tick={AXIS} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+          tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
         <YAxis tickFormatter={valueFormat} tick={AXIS} tickLine={false} axisLine={false} width={56} allowDecimals={false} />
-        <Tooltip {...TOOLTIP} cursor={{ stroke: '#cbd5e1' }} labelFormatter={fullDate}
+        <Tooltip {...TOOLTIP} cursor={LINE_CURSOR} labelFormatter={fullDate}
           formatter={(v, name) => [valueFormat(v), valueLabel ? `${name} (${valueLabel})` : name]} />
         <Legend {...LEGEND} />
         {series.map((s) => (

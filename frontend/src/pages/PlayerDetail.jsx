@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
-import { ArrowLeft, ClipboardPlus, GitCompare, Pencil, Trash2 } from 'lucide-react';
+import { ArrowLeft, ClipboardList, ClipboardPlus, GitCompare, Pencil, Trash2 } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { Avatar, PositionBadge, RecommendationBadge } from '../components/common/Badges';
-import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import { EmptyState, ErrorState, PageSkeleton } from '../components/common/States';
 import AttributeBars from '../components/players/AttributeBars';
 import { MonthlyFormChart, ValueHistoryChart } from '../components/players/MiniCharts';
 import { useToast } from '../context/ToastContext';
@@ -68,7 +68,7 @@ export default function PlayerDetail() {
     }
   }
 
-  if (loading) return <Spinner label="Loading player..." />;
+  if (loading) return <PageSkeleton label="Loading player..." />;
   if (error) return <ErrorState message={error} onRetry={reload} />;
 
   const p = player;
@@ -164,7 +164,8 @@ export default function PlayerDetail() {
 
       <Card title={`Scouting reports (${reportCount})`}>
         {reportCount === 0 ? (
-          <EmptyState title="No reports yet" message="Scouting reports about this player will appear here." />
+          <EmptyState icon={ClipboardList} title="No reports yet" message={`Be the first to scout ${p.name}.`}
+            action={<Link to={`/reports/new?playerId=${p.id}`}><Button size="sm" variant="secondary" icon={ClipboardPlus}>Write a report</Button></Link>} />
         ) : (
           <ul className="divide-y divide-secondary-100">
             {p.reports.map((r) => (

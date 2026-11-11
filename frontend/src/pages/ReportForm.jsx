@@ -8,7 +8,7 @@ import Card from '../components/common/Card';
 import PlayerPicker from '../components/common/PlayerPicker';
 import { PositionBadge } from '../components/common/Badges';
 import { TextAreaField, TextField } from '../components/common/Field';
-import { ErrorState, Spinner } from '../components/common/States';
+import { ErrorState, PageSkeleton } from '../components/common/States';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage, getFieldErrors } from '../services/api';
@@ -150,7 +150,7 @@ export default function ReportForm() {
     }
   }
 
-  if (loadState.loading) return <Spinner label="Loading..." />;
+  if (loadState.loading) return <PageSkeleton label="Loading report..." />;
   if (loadState.error) return <ErrorState message={loadState.error} />;
 
   const backTo = isEdit ? `/reports/${id}` : '/reports';

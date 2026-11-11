@@ -3,13 +3,13 @@
 // so the back button works, refreshing keeps your view, and a view can be shared as a link.
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitCompare, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitCompare, Plus, Search, SearchX, SlidersHorizontal, Users, X } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Highlight from '../components/common/Highlight';
 import Pagination from '../components/common/Pagination';
 import { Avatar, PositionBadge } from '../components/common/Badges';
-import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import { EmptyState, ErrorState, ListSkeleton } from '../components/common/States';
 import ActiveFilters from '../components/filters/ActiveFilters';
 import FilterPanel from '../components/filters/FilterPanel';
 import { useToast } from '../context/ToastContext';
@@ -184,7 +184,7 @@ export default function Players() {
       </div>
 
       {showFilters && (
-        <Card>
+        <Card className="motion-safe:animate-slide-down">
           <div id="filter-panel">
             <FilterPanel filters={filters} onChange={(next) => setView({ filters: next, page: 1 })} />
           </div>
@@ -209,12 +209,13 @@ export default function Players() {
       </label>
 
       <Card flush className="overflow-hidden">
-        {loading && <Spinner label="Loading players..." />}
+        {loading && <ListSkeleton label="Loading players..." />}
         {error && <div className="p-6"><ErrorState message={error} onRetry={reload} /></div>}
         {data && data.data.length === 0 && (q || activeCount
-          ? <EmptyState title="No players match" message="Try a different search, or remove some filters."
+          ? <EmptyState icon={SearchX} title="No players match" message="Try a different search, or remove some filters."
               action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear search and filters</Button>} />
-          : <EmptyState title="No players yet" message="Add the first player to get started." />)}
+          : <EmptyState icon={Users} title="No players yet" message="Add the first player to get started."
+              action={<Link to="/players/new"><Button size="sm" icon={Plus}>Add player</Button></Link>} />)}
 
         {data && data.data.length > 0 && (
           <>
@@ -237,7 +238,7 @@ export default function Players() {
                 </thead>
                 <tbody className="divide-y divide-secondary-100">
                   {data.data.map((p) => (
-                    <tr key={p.id} onClick={() => navigate(`/players/${p.id}`)} className="cursor-pointer hover:bg-primary-50/60">
+                    <tr key={p.id} onClick={() => navigate(`/players/${p.id}`)} className="cursor-pointer transition-colors duration-150 hover:bg-primary-50/60">
                       <td className="py-3 pl-4">
                         <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
                           disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />

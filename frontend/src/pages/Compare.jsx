@@ -2,11 +2,11 @@
 // The selection lives in the URL (/compare?ids=4,12,33), so the page can be shared as a link.
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { Download, Link2, X } from 'lucide-react';
+import { ChartLine, Download, GitCompare, Link2, X } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import PlayerPicker from '../components/common/PlayerPicker';
-import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import { EmptyState, ErrorState, ListSkeleton } from '../components/common/States';
 import CompareTable from '../components/compare/CompareTable';
 import { AttributeRadar, TimeLines } from '../components/compare/CompareCharts';
 import { useToast } from '../context/ToastContext';
@@ -129,12 +129,12 @@ export default function Compare() {
         )}
       </Card>
 
-      {loading && ids.length > 0 && <Spinner label="Loading players..." />}
+      {loading && ids.length > 0 && <Card><ListSkeleton rows={4} label="Loading players..." /></Card>}
       {error && <ErrorState message={error} onRetry={reload} />}
 
       {!loading && players.length < 2 && (
         <Card>
-          <EmptyState title={players.length ? 'Add one more player' : 'No players selected yet'}
+          <EmptyState icon={GitCompare} title={players.length ? 'Add one more player' : 'No players selected yet'}
             message="Search above, or tick players on the Players page and press Compare." />
         </Card>
       )}
@@ -145,7 +145,7 @@ export default function Compare() {
           <div role="tablist" aria-label="Metric category" className="flex gap-1 rounded-lg bg-secondary-100 p-1 sm:w-fit">
             {Object.entries(TABS).map(([key, t]) => (
               <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
-                className={`min-w-0 flex-1 rounded-md px-2 py-2 text-sm font-medium sm:flex-none sm:px-4 ${tab === key ? 'bg-white text-secondary-900 shadow-sm' : 'text-secondary-600 hover:text-secondary-900'}`}>
+                className={`min-w-0 flex-1 rounded-md px-2 py-2 text-sm font-medium transition-colors duration-150 sm:flex-none sm:px-4 ${tab === key ? 'bg-white text-secondary-900 shadow-sm' : 'text-secondary-600 hover:text-secondary-900'}`}>
                 {t.label}
               </button>
             ))}
@@ -180,7 +180,7 @@ function TabChart({ tab, players }) {
   })).filter((s) => s.points.length > 0);
 
   if (series.length === 0) {
-    return <EmptyState title="No history for these players"
+    return <EmptyState icon={ChartLine} title="No history for these players"
       message={tab === 'performance' ? 'Monthly form is only available for 12 players in the source data.' : 'Valuation history is only available for 12 players in the source data.'} />;
   }
   return (

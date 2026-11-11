@@ -5,7 +5,7 @@ import { ArrowLeft } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import { SelectField, TextField } from '../components/common/Field';
-import { ErrorState, Spinner } from '../components/common/States';
+import { ErrorState, PageSkeleton } from '../components/common/States';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage, getFieldErrors } from '../services/api';
 import { createPlayer, getPlayer, updatePlayer } from '../services/playerService';
@@ -122,7 +122,7 @@ export default function PlayerForm() {
     }
   }
 
-  if (loadState.loading) return <Spinner label="Loading player..." />;
+  if (loadState.loading) return <PageSkeleton label="Loading player..." />;
   if (loadState.error) return <ErrorState message={loadState.error} />;
 
   const backTo = isEdit ? `/players/${id}` : '/players';

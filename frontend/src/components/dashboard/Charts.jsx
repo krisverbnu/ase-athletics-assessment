@@ -1,18 +1,15 @@
 // The dashboard charts. Each takes the numbers it needs from /api/dashboard/stats.
 // Style rules (from ASE's guidelines + chart best practice):
-//   one y-axis per chart, light grid, axis text #6b7280, thin marks with rounded ends,
+//   one y-axis per chart, light grid, axis text slate-500, thin marks with rounded ends,
 //   a legend whenever there's more than one series, and a tooltip on hover.
 import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis,
   PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import { buildTrendRows } from '../../utils/chartData';
+import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { formatMoney, POSITION_COLORS, SERIES_COLORS } from '../../utils/format';
 
-const AXIS = { fill: '#6b7280', fontSize: 12 };
-const GRID = '#f3f4f6';
-const TOOLTIP = { contentStyle: { borderRadius: 8, border: '1px solid #e5e7eb', fontSize: 13 }, cursor: { fill: '#f8fafc' } };
-const LEGEND = { wrapperStyle: { fontSize: 13, paddingTop: 8 }, iconType: 'circle', iconSize: 10 };
 
 // 1. Goals and assists by position: grouped bars, one axis (both are counts)
 export function GoalsByPositionChart({ data }) {
@@ -20,7 +17,7 @@ export function GoalsByPositionChart({ data }) {
     <ResponsiveContainer width="100%" height={280}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }} barGap={2} barCategoryGap="28%">
         <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="position" interval={0} tick={AXIS} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+        <XAxis dataKey="position" interval={0} tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip {...TOOLTIP} />
         <Legend {...LEGEND} />
@@ -85,9 +82,9 @@ export function ValueTrendsChart({ trends }) {
       <LineChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
         <XAxis dataKey="time" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={monthLabel}
-          tick={AXIS} tickLine={false} axisLine={{ stroke: '#e5e7eb' }} />
+          tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
         <YAxis tickFormatter={formatMoney} tick={AXIS} tickLine={false} axisLine={false} width={56} />
-        <Tooltip {...TOOLTIP} cursor={{ stroke: '#cbd5e1' }} formatter={(v, name) => [formatMoney(v), name]}
+        <Tooltip {...TOOLTIP} cursor={LINE_CURSOR} formatter={(v, name) => [formatMoney(v), name]}
           labelFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })} />
         <Legend {...LEGEND} />
         {trends.map((player, i) => (
@@ -112,7 +109,7 @@ export function AttributesRadar({ data }) {
   return (
     <ResponsiveContainer width="100%" height={320}>
       <RadarChart data={rows} outerRadius="72%">
-        <PolarGrid stroke="#e5e7eb" />
+        <PolarGrid stroke="#e2e8f0" />
         <PolarAngleAxis dataKey="attribute" tick={{ ...AXIS, fill: '#475569' }} />
         <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
         <Tooltip {...TOOLTIP} />

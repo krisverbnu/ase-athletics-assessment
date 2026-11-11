@@ -3,10 +3,10 @@
 // update together when a filter changes. Filters live in the URL, like on Players.
 import { useEffect, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router';
-import { CalendarClock, Coins, Goal, SlidersHorizontal, Users } from 'lucide-react';
+import { CalendarClock, ChartLine, Coins, Goal, SearchX, SlidersHorizontal, Users } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
-import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import { DashboardSkeleton, EmptyState, ErrorState } from '../components/common/States';
 import ActiveFilters from '../components/filters/ActiveFilters';
 import FilterPanel from '../components/filters/FilterPanel';
 import ChartCard from '../components/dashboard/ChartCard';
@@ -63,13 +63,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {showFilters && <Card><FilterPanel filters={filters} onChange={setFilters} /></Card>}
+      {showFilters && <Card className="motion-safe:animate-slide-down"><FilterPanel filters={filters} onChange={setFilters} /></Card>}
       <ActiveFilters filters={filters} onChange={setFilters} onClearAll={clearAll} />
 
-      {loading && <Spinner label="Crunching the numbers..." />}
+      {loading && <DashboardSkeleton />}
       {error && <ErrorState message={error} onRetry={reload} />}
       {response && response.data.kpis.totalPlayers === 0 && (
-        <Card><EmptyState title="No players match these filters" action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear filters</Button>} /></Card>
+        <Card><EmptyState icon={SearchX} title="No players match these filters" action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear filters</Button>} /></Card>
       )}
       {response && response.data.kpis.totalPlayers > 0 && (
         <DashboardContent stats={response.data} />
@@ -123,7 +123,7 @@ function DashboardContent({ stats }) {
           ...topTrends.map((t) => ({ label: t.name, value: (r) => r[t.name] }))]) : undefined}>
         {topTrends.length
           ? <ValueTrendsChart trends={topTrends} />
-          : <EmptyState title="No valuation history for these players" message="Market values are only available for 12 players in the source data." />}
+          : <EmptyState icon={ChartLine} title="No valuation history for these players" message="Market values are only available for 12 players in the source data." />}
       </ChartCard>
 
       <div className="grid gap-6 lg:grid-cols-2">

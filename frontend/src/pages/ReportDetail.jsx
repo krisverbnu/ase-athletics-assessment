@@ -7,7 +7,7 @@ import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import { PositionBadge, RecommendationBadge } from '../components/common/Badges';
-import { ErrorState, Spinner } from '../components/common/States';
+import { ErrorState, PageSkeleton } from '../components/common/States';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useApi } from '../hooks';
@@ -53,7 +53,7 @@ export default function ReportDetail() {
     }
   }
 
-  if (loading) return <Spinner label="Loading report..." />;
+  if (loading) return <PageSkeleton label="Loading report..." />;
   if (error) return <ErrorState message={error} onRetry={reload} />;
 
   const details = [

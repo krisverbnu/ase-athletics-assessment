@@ -1,14 +1,14 @@
 // All scouting reports, newest match first, filterable by player, scout and recommendation.
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { Eye, Pencil, Plus, Trash2, X } from 'lucide-react';
+import { ClipboardList, Eye, Pencil, Plus, SearchX, Trash2, X } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import ConfirmDialog from '../components/common/ConfirmDialog';
 import PlayerPicker from '../components/common/PlayerPicker';
 import { PositionBadge, RecommendationBadge } from '../components/common/Badges';
 import { SelectField } from '../components/common/Field';
-import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import { CardGridSkeleton, EmptyState, ErrorState } from '../components/common/States';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { useApi } from '../hooks';
@@ -94,11 +94,11 @@ export default function Reports() {
         )}
       </Card>
 
-      {loading && <Spinner label="Loading reports..." />}
+      {loading && <CardGridSkeleton label="Loading reports..." />}
       {error && <ErrorState message={error} onRetry={reload} />}
       {data && data.data.length === 0 && (
         <Card>
-          <EmptyState title={hasFilters ? 'No reports match these filters' : 'No reports yet'}
+          <EmptyState icon={hasFilters ? SearchX : ClipboardList} title={hasFilters ? 'No reports match these filters' : 'No reports yet'}
             message={hasFilters ? 'Try removing a filter.' : 'Write the first scouting report.'}
             action={!hasFilters && <Link to="/reports/new"><Button size="sm">Write a report</Button></Link>} />
         </Card>
@@ -108,10 +108,12 @@ export default function Reports() {
         <ul className="grid gap-4 md:grid-cols-2">
           {data.data.map((r) => (
             <li key={r.id}>
-              <Card className="flex h-full flex-col gap-4">
+              {/* The whole card opens the report: the "View" link stretches over it (after:absolute
+                  inset-0), and the other links sit above it (relative z-10) so they still work */}
+              <Card className="relative flex h-full flex-col gap-4 transition duration-200 hover:border-primary-200 hover:shadow-md motion-safe:hover:-translate-y-0.5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <Link to={`/players/${r.player.id}`} className="text-lg font-semibold text-secondary-900 hover:text-primary-700">{r.player.name}</Link>
+                    <Link to={`/players/${r.player.id}`} className="relative z-10 text-lg font-semibold text-secondary-900 hover:text-primary-700">{r.player.name}</Link>
                     <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-secondary-500">
                       <PositionBadge position={r.player.position} /><span>{r.player.team}</span>
                     </div>
@@ -129,10 +131,10 @@ export default function Reports() {
                 <div className="mt-auto flex items-center justify-between gap-2 border-t border-secondary-100 pt-3">
                   <p className="text-xs text-secondary-500">By {r.scout.name}</p>
                   <div className="flex gap-1">
-                    <Link to={`/reports/${r.id}`} aria-label={`View report on ${r.player.name}`} className="rounded-md p-2 text-secondary-600 hover:bg-secondary-100"><Eye className="size-4" /></Link>
+                    <Link to={`/reports/${r.id}`} aria-label={`View report on ${r.player.name}`} className="rounded-md p-2 text-secondary-600 after:absolute after:inset-0 after:rounded-lg hover:bg-secondary-100"><Eye className="size-4" /></Link>
                     {r.scout.id === user?.id && (<>
-                    <Link to={`/reports/${r.id}/edit`} aria-label={`Edit report on ${r.player.name}`} className="rounded-md p-2 text-secondary-600 hover:bg-secondary-100"><Pencil className="size-4" /></Link>
-                    <button type="button" onClick={() => setToDelete(r)} aria-label={`Delete report on ${r.player.name}`} className="rounded-md p-2 text-red-600 hover:bg-red-50"><Trash2 className="size-4" /></button>
+                    <Link to={`/reports/${r.id}/edit`} aria-label={`Edit report on ${r.player.name}`} className="relative z-10 rounded-md p-2 text-secondary-600 hover:bg-secondary-100"><Pencil className="size-4" /></Link>
+                    <button type="button" onClick={() => setToDelete(r)} aria-label={`Delete report on ${r.player.name}`} className="relative z-10 rounded-md p-2 text-red-600 hover:bg-red-50"><Trash2 className="size-4" /></button>
                     </>)}
                   </div>
                 </div>
