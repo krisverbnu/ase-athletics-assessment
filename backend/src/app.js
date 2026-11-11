@@ -13,7 +13,11 @@ const app = express();
 app.use(helmet());
 
 // Only our frontend(s) may call the API. CLIENT_URL can list several, comma-separated.
-const allowedOrigins = (process.env.CLIENT_URL || '').split(',').map((o) => o.trim()).filter(Boolean);
+// A browser's origin never ends in "/", so trailing slashes are removed to avoid a silent mismatch.
+const allowedOrigins = (process.env.CLIENT_URL || '')
+  .split(',')
+  .map((o) => o.trim().replace(/\/+$/, ''))
+  .filter(Boolean);
 app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : '*' }));
 
 // Read JSON bodies, max 100 kB so nobody can flood us with huge requests
