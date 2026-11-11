@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from 'react-router';
 import Layout from './components/layout/Layout';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import ComingSoon from './pages/ComingSoon';
+import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import PlayerDetail from './pages/PlayerDetail';
@@ -21,7 +22,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<ComingSoon title="Dashboard" />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/players" element={<Players />} />
           <Route path="/players/new" element={<PlayerForm />} />
           <Route path="/players/:id" element={<PlayerDetail />} />

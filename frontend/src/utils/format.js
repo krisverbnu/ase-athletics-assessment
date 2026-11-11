@@ -20,13 +20,24 @@ export const toInputDate = (value) => (value ? new Date(value).toISOString().sli
 export const initials = (name = '') =>
   name.split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
 
-// One colour per position, used for badges (from the guidelines' accent colours)
+// One colour per position, from ASE's chart palette. The same colour is used for the badge
+// and in every chart, so "violet = Forward" everywhere. Red is left out on purpose: it's
+// reserved for warnings. (Checked for colour-blind separation with a palette validator.)
+export const POSITION_COLORS = {
+  Goalkeeper: '#f59e0b',
+  Defender: '#10b981',
+  Midfielder: '#0ea5e9',
+  Forward: '#8b5cf6',
+};
 export const POSITION_STYLES = {
   Goalkeeper: 'bg-amber-100 text-amber-800',
   Defender: 'bg-emerald-100 text-emerald-800',
   Midfielder: 'bg-primary-100 text-primary-800',
-  Forward: 'bg-rose-100 text-rose-800',
+  Forward: 'bg-violet-100 text-violet-800',
 };
+
+// ASE's chart colours (ui_guidelines.json), in their order, minus red (kept for warnings)
+export const SERIES_COLORS = ['#0ea5e9', '#10b981', '#f59e0b', '#8b5cf6', '#f97316'];
 
 export const POSITIONS = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
 

@@ -1,49 +1,124 @@
-// Player directory: sortable, paginated table (cards on phones).
-// Page, sort and order live in the URL (?page=2&sort=age&order=desc),
-// so the back button works and a view can be shared as a link.
+// Player directory: search, filters, sortable paginated table (cards on phones), CSV export.
+// Search, filters, page and sort all live in the URL (?q=real&position=Forward&page=2...),
+// so the back button works, refreshing keeps your view, and a view can be shared as a link.
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowDown, ArrowUp, ArrowUpDown, Plus } from 'lucide-react';
+import { ArrowDown, ArrowUp, ArrowUpDown, Download, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
+import Highlight from '../components/common/Highlight';
 import Pagination from '../components/common/Pagination';
 import { Avatar, PositionBadge } from '../components/common/Badges';
 import { EmptyState, ErrorState, Spinner } from '../components/common/States';
+import ActiveFilters from '../components/filters/ActiveFilters';
+import FilterPanel from '../components/filters/FilterPanel';
+import { useToast } from '../context/ToastContext';
 import { useApi } from '../hooks';
+import { getErrorMessage } from '../services/api';
 import { getPlayers } from '../services/playerService';
+import { downloadCsv } from '../utils/csv';
+import { countActive, filtersToParams, loadSavedFilters, readFilters, saveFilters } from '../utils/filters';
 import { formatDate, formatMoney } from '../utils/format';
 
 const PAGE_SIZE = 25;
 const COLUMNS = [
-  { key: 'name', label: 'Player', sortable: true },
-  { key: 'position', label: 'Position', sortable: true },
-  { key: 'age', label: 'Age', sortable: true, align: 'right' },
-  { key: 'team', label: 'Team', sortable: true },
-  { key: 'goals', label: 'Goals', sortable: true, align: 'right' },
-  { key: 'assists', label: 'Assists', sortable: true, align: 'right' },
-  { key: 'marketValue', label: 'Market value', sortable: true, align: 'right' },
-  { key: 'contractEnd', label: 'Contract until', sortable: true },
+  { key: 'name', label: 'Player' },
+  { key: 'position', label: 'Position' },
+  { key: 'age', label: 'Age', align: 'right' },
+  { key: 'team', label: 'Team' },
+  { key: 'goals', label: 'Goals', align: 'right' },
+  { key: 'assists', label: 'Assists', align: 'right' },
+  { key: 'marketValue', label: 'Market value', align: 'right' },
+  { key: 'contractEnd', label: 'Contract until' },
 ];
+
+// Text columns start A to Z; number columns start biggest first (scouts want top scorers first)
+const defaultOrder = (key) => (['name', 'team', 'position'].includes(key) ? 'asc' : 'desc');
 
 export default function Players() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [params, setParams] = useSearchParams();
   const page = Number(params.get('page')) || 1;
   const sort = params.get('sort') || 'name';
   const order = params.get('order') || 'asc';
+  const q = params.get('q') || '';
+  const filters = readFilters(params);
+  const activeCount = countActive(filters);
 
+  const [searchText, setSearchText] = useState(q);
+  const [showFilters, setShowFilters] = useState(activeCount > 0);
+  const [exporting, setExporting] = useState(false);
+
+  // Write a new view into the URL. Anything not mentioned in `changes` stays as it is.
+  const setView = (changes) => {
+    const next = { page, sort, order, q, filters, ...changes };
+    setParams({
+      page: String(next.page),
+      sort: next.sort,
+      order: next.order,
+      ...(next.q && { q: next.q }),
+      ...filtersToParams(next.filters),
+    });
+  };
+
+  // Coming back to /players with no filters in the URL? Restore the ones from this session.
+  useEffect(() => {
+    const saved = loadSavedFilters();
+    if (saved && !params.toString()) setParams(new URLSearchParams(saved), { replace: true });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Remember the current view for this browser tab (bonus: filter persistence)
+  useEffect(() => { saveFilters(params.toString()); }, [params]);
+
+  // Debounce: only search 300 ms after the user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchText.trim() !== q) setView({ q: searchText.trim(), page: 1 });
+    }, 300);
+    return () => clearTimeout(timer);
+  });
+
+  const filterKey = JSON.stringify(filtersToParams(filters));
   const { data, loading, error, reload } = useApi(
-    () => getPlayers({ page, limit: PAGE_SIZE, sort, order }),
-    [page, sort, order],
+    () => getPlayers({ page, limit: PAGE_SIZE, sort, order, q, ...filters }),
+    [page, sort, order, q, filterKey],
   );
 
-  const setQuery = (changes) => setParams({ page, sort, order, ...changes });
-
-  // Click a column: sort by it; click again: flip the direction
-  const toggleSort = (key) => setQuery({
+  const toggleSort = (key) => setView({
     sort: key,
-    order: sort === key && order === 'asc' ? 'desc' : key === 'name' || key === 'team' ? 'asc' : 'desc',
+    order: sort === key ? (order === 'asc' ? 'desc' : 'asc') : defaultOrder(key),
     page: 1,
   });
+
+  const clearAll = () => { setSearchText(''); setView({ q: '', filters: readFilters(new URLSearchParams()), page: 1 }); };
+
+  // Export every player matching the current search and filters, not just this page
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const { data: rows } = await getPlayers({ page: 1, limit: 100, sort, order, q, ...filters });
+      downloadCsv('ase-players.csv', rows, [
+        { label: 'Name', value: (p) => p.name },
+        { label: 'Position', value: (p) => p.position },
+        { label: 'Age', value: (p) => p.age },
+        { label: 'Team', value: (p) => p.team },
+        { label: 'Nationality', value: (p) => p.nationality },
+        { label: 'Appearances', value: (p) => p.appearances },
+        { label: 'Goals', value: (p) => p.goals },
+        { label: 'Assists', value: (p) => p.assists },
+        { label: 'Minutes', value: (p) => p.minutesPlayed },
+        { label: 'Market value (EUR)', value: (p) => p.marketValue },
+        { label: 'Weekly salary (EUR, assumed)', value: (p) => p.contractSalary },
+        { label: 'Contract end', value: (p) => p.contractEnd?.slice(0, 10) },
+      ]);
+      toast.success(`Exported ${rows.length} players.`);
+    } catch (err) {
+      toast.error(getErrorMessage(err));
+    } finally {
+      setExporting(false);
+    }
+  }
 
   const SortIcon = ({ column }) => {
     if (sort !== column) return <ArrowUpDown className="size-3.5 text-secondary-400" aria-hidden />;
@@ -55,15 +130,72 @@ export default function Players() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-secondary-900">Players</h1>
-          <p className="mt-1 text-sm text-secondary-500">Every player in the database, with season stats and contract details.</p>
+          <p className="mt-1 text-sm text-secondary-500">Search, filter and sort every player in the database.</p>
         </div>
-        <Link to="/players/new"><Button icon={Plus}>Add player</Button></Link>
+        <div className="flex gap-2">
+          <Button variant="secondary" icon={Download} loading={exporting} onClick={handleExport} disabled={!data?.meta.total}>Export CSV</Button>
+          <Link to="/players/new"><Button icon={Plus}>Add player</Button></Link>
+        </div>
       </div>
+
+      {/* Search + filter toggle */}
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-secondary-400" aria-hidden />
+          <input
+            type="text"
+            enterKeyHint="search"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+            placeholder="Search by name, team or nationality..."
+            aria-label="Search players"
+            className="h-12 w-full rounded-md border border-secondary-300 bg-white pl-12 pr-12 text-sm focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15"
+          />
+          {searchText && (
+            <button type="button" onClick={() => setSearchText('')} aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-secondary-400 hover:text-secondary-700">
+              <X className="size-5" />
+            </button>
+          )}
+        </div>
+        <Button variant={showFilters ? 'primary' : 'secondary'} icon={SlidersHorizontal} className="h-12"
+          onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters} aria-controls="filter-panel">
+          Filters{activeCount > 0 && ` (${activeCount})`}
+        </Button>
+      </div>
+
+      {showFilters && (
+        <Card>
+          <div id="filter-panel">
+            <FilterPanel filters={filters} onChange={(next) => setView({ filters: next, page: 1 })} />
+          </div>
+        </Card>
+      )}
+
+      <ActiveFilters filters={filters} onChange={(next) => setView({ filters: next, page: 1 })} onClearAll={clearAll} />
+
+      {/* Phones have no column headers to click, so sorting is a dropdown */}
+      <label className="flex items-center gap-2 text-sm text-secondary-700 md:hidden">
+        Sort by
+        <select value={`${sort}:${order}`} onChange={(e) => { const [s, o] = e.target.value.split(':'); setView({ sort: s, order: o, page: 1 }); }}
+          className="flex-1 rounded-md border border-secondary-300 bg-white px-3 py-2.5">
+          <option value="name:asc">Name (A–Z)</option>
+          <option value="goals:desc">Most goals</option>
+          <option value="assists:desc">Most assists</option>
+          <option value="marketValue:desc">Highest market value</option>
+          <option value="age:asc">Youngest</option>
+          <option value="age:desc">Oldest</option>
+          <option value="contractEnd:asc">Contract ending soonest</option>
+        </select>
+      </label>
 
       <Card flush className="overflow-hidden">
         {loading && <Spinner label="Loading players..." />}
         {error && <div className="p-6"><ErrorState message={error} onRetry={reload} /></div>}
-        {data && data.data.length === 0 && <EmptyState title="No players yet" message="Add the first player to get started." />}
+        {data && data.data.length === 0 && (q || activeCount
+          ? <EmptyState title="No players match" message="Try a different search, or remove some filters."
+              action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear search and filters</Button>} />
+          : <EmptyState title="No players yet" message="Add the first player to get started." />)}
 
         {data && data.data.length > 0 && (
           <>
@@ -90,14 +222,16 @@ export default function Players() {
                         <div className="flex items-center gap-3">
                           <Avatar name={p.name} size="sm" />
                           <div>
-                            <Link to={`/players/${p.id}`} onClick={(e) => e.stopPropagation()} className="font-semibold text-secondary-900 hover:text-primary-700">{p.name}</Link>
-                            <p className="text-xs text-secondary-500">{p.nationality}</p>
+                            <Link to={`/players/${p.id}`} onClick={(e) => e.stopPropagation()} className="font-semibold text-secondary-900 hover:text-primary-700">
+                              <Highlight text={p.name} query={q} />
+                            </Link>
+                            <p className="text-xs text-secondary-500"><Highlight text={p.nationality} query={q} /></p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3"><PositionBadge position={p.position} /></td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.age}</td>
-                      <td className="px-4 py-3">{p.team}</td>
+                      <td className="px-4 py-3"><Highlight text={p.team} query={q} /></td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.goals}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.assists}</td>
                       <td className={`px-4 py-3 text-right tabular-nums ${p.marketValue == null ? 'text-secondary-400' : ''}`}>
@@ -117,8 +251,8 @@ export default function Players() {
                   <Link to={`/players/${p.id}`} className="flex items-center gap-3 px-4 py-4 active:bg-secondary-50">
                     <Avatar name={p.name} size="sm" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-secondary-900">{p.name}</p>
-                      <p className="truncate text-xs text-secondary-500">{p.team} · {p.age} yrs</p>
+                      <p className="truncate font-semibold text-secondary-900"><Highlight text={p.name} query={q} /></p>
+                      <p className="truncate text-xs text-secondary-500"><Highlight text={p.team} query={q} /> · {p.age} yrs</p>
                     </div>
                     <div className="text-right">
                       <PositionBadge position={p.position} />
@@ -131,7 +265,7 @@ export default function Players() {
 
             <div className="border-t border-secondary-200 px-4 py-4">
               <Pagination page={data.meta.page} totalPages={data.meta.totalPages} total={data.meta.total} limit={PAGE_SIZE}
-                onChange={(p) => { setQuery({ page: p }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+                onChange={(p) => { setView({ page: p }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
             </div>
           </>
         )}
