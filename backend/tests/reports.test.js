@@ -12,8 +12,21 @@ const { authAs } = require('./helpers');
 const author = { id: 1, email: 'demo@ase-athletics.com', name: 'Demo Scout' };
 const otherScout = { id: 2, email: 'other@ase-athletics.com', name: 'Other Scout' };
 
-const ratings = Object.fromEntries(['technical', 'physical', 'mental', 'tactical', 'finishing', 'passing',
-  'dribbling', 'defending', 'leadership', 'workRate', 'overallRating'].map((k) => [k, 8]));
+const ratings = Object.fromEntries(
+  [
+    'technical',
+    'physical',
+    'mental',
+    'tactical',
+    'finishing',
+    'passing',
+    'dribbling',
+    'defending',
+    'leadership',
+    'workRate',
+    'overallRating',
+  ].map((k) => [k, 8]),
+);
 const newReport = { playerId: 5, matchDate: '2025-05-10', opponent: 'Arsenal', recommendation: 'MONITOR', ...ratings };
 
 beforeEach(() => {
@@ -25,7 +38,10 @@ test('a new report is saved under the logged-in scout, whatever the request says
   prisma.player.findUnique.mockResolvedValue({ id: 5 });
   prisma.scoutReport.create.mockImplementation(({ data }) => Promise.resolve({ id: 10, ...data }));
 
-  const res = await request(app).post('/api/reports').set(authAs(author)).send({ ...newReport, scoutId: 999 });
+  const res = await request(app)
+    .post('/api/reports')
+    .set(authAs(author))
+    .send({ ...newReport, scoutId: 999 });
 
   expect(res.status).toBe(201);
   expect(prisma.scoutReport.create.mock.calls[0][0].data.scoutId).toBe(author.id);
@@ -39,7 +55,10 @@ test('a report on a player who does not exist is rejected', async () => {
 });
 
 test('ratings outside 1 to 10 are rejected', async () => {
-  const res = await request(app).post('/api/reports').set(authAs(author)).send({ ...newReport, overallRating: 11 });
+  const res = await request(app)
+    .post('/api/reports')
+    .set(authAs(author))
+    .send({ ...newReport, overallRating: 11 });
   expect(res.status).toBe(400);
   expect(res.body.error.details[0].field).toBe('overallRating');
 });

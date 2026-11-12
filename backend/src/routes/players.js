@@ -2,7 +2,11 @@ const { Router } = require('express');
 const controller = require('../controllers/playerController');
 const validate = require('../middleware/validate');
 const {
-  listQuerySchema, searchQuerySchema, playerSchema, updatePlayerSchema, idParamSchema,
+  listQuerySchema,
+  searchQuerySchema,
+  playerSchema,
+  updatePlayerSchema,
+  idParamSchema,
 } = require('../validators/players');
 
 const router = Router();

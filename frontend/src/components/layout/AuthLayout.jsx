@@ -5,7 +5,10 @@ export default function AuthLayout({ title, subtitle, children, footer }) {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-secondary-900 px-4 py-12">
       {/* A soft brand-blue glow from the top, then the pitch lines */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.22),transparent_60%)]" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.22),transparent_60%)]"
+      />
       <PitchBackground />
 
       <div className="relative w-full max-w-md motion-safe:animate-fade-in">

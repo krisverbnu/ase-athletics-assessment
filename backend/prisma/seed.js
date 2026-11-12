@@ -66,8 +66,20 @@ const toDate = (value) => (value ? new Date(`${value}T00:00:00Z`) : null);
 // When the year is missing, we walk the list in order starting in 2024 (the season's
 // first year) and move to the next year whenever the months wrap past December.
 // e.g. ["August", ..., "December", "January"] -> Aug 2024 ... Dec 2024, Jan 2025
-const MONTHS = ['january', 'february', 'march', 'april', 'may', 'june', 'july',
-  'august', 'september', 'october', 'november', 'december'];
+const MONTHS = [
+  'january',
+  'february',
+  'march',
+  'april',
+  'may',
+  'june',
+  'july',
+  'august',
+  'september',
+  'october',
+  'november',
+  'december',
+];
 const SEASON_START_YEAR = 2024;
 
 function monthsToDates(labels) {
@@ -87,12 +99,8 @@ function monthsToDates(labels) {
   });
 }
 
-// "Marcus Thompson" -> "MT" (used as a placeholder avatar)
-const initials = (name) => name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
-
 // Same name even with accents or different capitals: "Matías" == "matias"
-const normaliseName = (name) =>
-  name.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
+const normaliseName = (name) => name.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().toLowerCase();
 
 const isRetired = (detail) =>
   /retired/i.test(detail.clubInfo?.currentTeam || '') || detail.clubInfo?.playerStatus === 'Retired';
@@ -213,14 +221,14 @@ function fromDetailedFile(key, d) {
     yellowCards: stats.yellowCards ?? 0,
     redCards: stats.redCards ?? 0,
     passAccuracy: adv.passingMetrics?.passAccuracy ?? null,
-    shotsOnTarget: isGk ? null : adv.shootingMetrics?.shotsOnTarget ?? null,
-    totalShots: isGk ? null : adv.shootingMetrics?.totalShots ?? null,
+    shotsOnTarget: isGk ? null : (adv.shootingMetrics?.shotsOnTarget ?? null),
+    totalShots: isGk ? null : (adv.shootingMetrics?.totalShots ?? null),
     dribblesCompleted: null, // not given in a comparable form
-    tacklesWon: isGk ? null : adv.defensiveMetrics?.tacklesWon ?? null,
+    tacklesWon: isGk ? null : (adv.defensiveMetrics?.tacklesWon ?? null),
     aerialDuelsWon: null, // detailed file gives attempts and %, not wins
-    saves: isGk ? d.seasonStats?.goalkeepingStats?.saves ?? null : null,
-    cleanSheets: isGk ? stats.cleanSheets ?? null : null,
-    goalsConceded: isGk ? d.seasonStats?.goalkeepingStats?.goalsConceded ?? null : null,
+    saves: isGk ? (d.seasonStats?.goalkeepingStats?.saves ?? null) : null,
+    cleanSheets: isGk ? (stats.cleanSheets ?? null) : null,
+    goalsConceded: isGk ? (d.seasonStats?.goalkeepingStats?.goalsConceded ?? null) : null,
     contractSalary: d.contractInfo?.salary?.weeklyWage ?? null, // weekly EUR, stated in the file
     contractEnd: toDate(d.contractInfo?.contractEnd),
     marketValue: d.marketData?.currentMarketValue ?? null,
@@ -232,9 +240,9 @@ function fromDetailedFile(key, d) {
       defending: tech.defending,
       physical: tech.physical,
       positioning: det.positioning ?? null,
-      finishing: isGk ? null : det.finishing ?? null,
-      crossing: isGk ? null : det.crossing ?? null,
-      longShots: isGk ? null : det.longShots ?? null,
+      finishing: isGk ? null : (det.finishing ?? null),
+      crossing: isGk ? null : (det.crossing ?? null),
+      longShots: isGk ? null : (det.longShots ?? null),
       diving: gkAttrs.diving ?? null,
       handling: gkAttrs.handling ?? null,
       kicking: gkAttrs.kicking ?? null,
@@ -316,7 +324,9 @@ function buildSeedData() {
     const player = byName.get(normaliseName(r.playerName));
     if (!player) throw new Error(`Report ${r.id}: player "${r.playerName}" not found in either file`);
     if (player.sourceId !== `main:${r.playerId}`) {
-      log.push(`report ${r.id}: playerId ${r.playerId} not in main file, linked by name to ${player.name} (${player.sourceId})`);
+      log.push(
+        `report ${r.id}: playerId ${r.playerId} not in main file, linked by name to ${player.name} (${player.sourceId})`,
+      );
     }
     return { playerSourceId: player.sourceId, scoutName: r.scoutName, data: fromReport(r) };
   });
@@ -334,8 +344,14 @@ async function main() {
     console.log(`Players with market value: ${players.filter((p) => p.marketValue).length}`);
     console.log(`Value history points: ${players.reduce((n, p) => n + p.marketValues.length, 0)}`);
     console.log(`Monthly form rows: ${players.reduce((n, p) => n + p.monthlyForm.length, 0)}`);
-    console.log('Positions:', players.reduce((acc, p) => ({ ...acc, [p.position]: (acc[p.position] || 0) + 1 }), {}));
-    console.log('Recommendations:', reports.map((r) => `${r.data.recommendation} (overall ${r.data.overallRating})`).join(', '));
+    console.log(
+      'Positions:',
+      players.reduce((acc, p) => ({ ...acc, [p.position]: (acc[p.position] || 0) + 1 }), {}),
+    );
+    console.log(
+      'Recommendations:',
+      reports.map((r) => `${r.data.recommendation} (overall ${r.data.overallRating})`).join(', '),
+    );
     return;
   }
 

@@ -15,9 +15,21 @@ import { getErrorMessage } from '../services/api';
 import { deleteReport, getReport } from '../services/reportService';
 import { formatDate, ratingLabel } from '../utils/format';
 
-const CATEGORIES = ['technical', 'physical', 'mental', 'tactical', 'finishing', 'passing', 'dribbling', 'defending', 'leadership', 'workRate'];
+const CATEGORIES = [
+  'technical',
+  'physical',
+  'mental',
+  'tactical',
+  'finishing',
+  'passing',
+  'dribbling',
+  'defending',
+  'leadership',
+  'workRate',
+];
 const label = (k) => (k === 'workRate' ? 'Work rate' : k.charAt(0).toUpperCase() + k.slice(1));
-const barColour = (v) => (v >= 9 ? 'bg-emerald-500' : v >= 7 ? 'bg-primary-500' : v >= 5 ? 'bg-amber-500' : 'bg-red-500');
+const barColour = (v) =>
+  v >= 9 ? 'bg-emerald-500' : v >= 7 ? 'bg-primary-500' : v >= 5 ? 'bg-amber-500' : 'bg-red-500';
 
 function BulletList({ title, items }) {
   if (!items?.length) return null;
@@ -25,7 +37,9 @@ function BulletList({ title, items }) {
     <div>
       <h3 className="text-sm font-semibold text-secondary-900">{title}</h3>
       <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-secondary-700">
-        {items.map((item) => <li key={item}>{item}</li>)}
+        {items.map((item) => (
+          <li key={item}>{item}</li>
+        ))}
       </ul>
     </div>
   );
@@ -57,13 +71,21 @@ export default function ReportDetail() {
   if (error) return <ErrorState message={error} onRetry={reload} />;
 
   const details = [
-    ['Match date', formatDate(r.matchDate)], ['Opponent', r.opponent], ['Competition', r.competition],
-    ['Venue', r.venue], ['Result', r.result], ['Minutes played', r.minutesPlayed], ['Played as', r.positionPlayed],
+    ['Match date', formatDate(r.matchDate)],
+    ['Opponent', r.opponent],
+    ['Competition', r.competition],
+    ['Venue', r.venue],
+    ['Result', r.result],
+    ['Minutes played', r.minutesPlayed],
+    ['Played as', r.positionPlayed],
   ].filter(([, v]) => v !== null && v !== undefined && v !== '');
 
   return (
     <div className="flex flex-col gap-6">
-      <Link to="/reports" className="inline-flex items-center gap-1 text-sm text-secondary-600 hover:text-primary-700 print:hidden">
+      <Link
+        to="/reports"
+        className="inline-flex items-center gap-1 text-sm text-secondary-600 hover:text-primary-700 print:hidden"
+      >
         <ArrowLeft className="size-4" aria-hidden /> All reports
       </Link>
 
@@ -72,28 +94,45 @@ export default function ReportDetail() {
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-secondary-500">Scouting report</p>
             <h1 className="mt-1 text-2xl font-bold text-secondary-900">
-              <Link to={`/players/${r.player.id}`} className="hover:text-primary-700">{r.player.name}</Link>
+              <Link to={`/players/${r.player.id}`} className="hover:text-primary-700">
+                {r.player.name}
+              </Link>
             </h1>
             <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-secondary-600">
               <PositionBadge position={r.player.position} /> {r.player.team}
             </p>
-            <p className="mt-2 text-sm text-secondary-500">By {r.scout.name} · written {formatDate(r.createdAt)}</p>
+            <p className="mt-2 text-sm text-secondary-500">
+              By {r.scout.name} · written {formatDate(r.createdAt)}
+            </p>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p className="text-4xl font-bold tabular-nums text-secondary-900">{r.overallRating}<span className="text-lg text-secondary-400">/10</span></p>
+              <p className="text-4xl font-bold tabular-nums text-secondary-900">
+                {r.overallRating}
+                <span className="text-lg text-secondary-400">/10</span>
+              </p>
               <p className="text-sm text-secondary-500">{ratingLabel(r.overallRating)}</p>
             </div>
             <RecommendationBadge value={r.recommendation} />
           </div>
         </div>
         <div className="mt-6 flex flex-wrap gap-2 print:hidden">
-          <Button variant="secondary" icon={Printer} onClick={() => window.print()}>Print / Save as PDF</Button>
+          <Button variant="secondary" icon={Printer} onClick={() => window.print()}>
+            Print / Save as PDF
+          </Button>
           {/* Only the scout who wrote the report can change it (the API enforces this too) */}
-          {r.scout.id === user?.id && (<>
-            <Link to={`/reports/${r.id}/edit`}><Button variant="secondary" icon={Pencil}>Edit</Button></Link>
-            <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>Delete</Button>
-          </>)}
+          {r.scout.id === user?.id && (
+            <>
+              <Link to={`/reports/${r.id}/edit`}>
+                <Button variant="secondary" icon={Pencil}>
+                  Edit
+                </Button>
+              </Link>
+              <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>
+                Delete
+              </Button>
+            </>
+          )}
         </div>
       </Card>
 
@@ -102,7 +141,8 @@ export default function ReportDetail() {
           <dl className="divide-y divide-secondary-100">
             {details.map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 py-2 text-sm">
-                <dt className="text-secondary-500">{k}</dt><dd className="text-right font-medium text-secondary-900">{v}</dd>
+                <dt className="text-secondary-500">{k}</dt>
+                <dd className="text-right font-medium text-secondary-900">{v}</dd>
               </div>
             ))}
           </dl>
@@ -113,7 +153,10 @@ export default function ReportDetail() {
               <div key={k}>
                 <div className="flex justify-between text-sm">
                   <dt className="text-secondary-600">{label(k)}</dt>
-                  <dd className="font-semibold tabular-nums text-secondary-900">{r[k]}<span className="font-normal text-secondary-400">/10</span></dd>
+                  <dd className="font-semibold tabular-nums text-secondary-900">
+                    {r[k]}
+                    <span className="font-normal text-secondary-400">/10</span>
+                  </dd>
                 </div>
                 <div className="mt-1 h-2 rounded-full bg-secondary-100" role="presentation">
                   <div className={`h-2 rounded-full ${barColour(r[k])}`} style={{ width: `${r[k] * 10}%` }} />
@@ -141,8 +184,14 @@ export default function ReportDetail() {
         </div>
       </Card>
 
-      <ConfirmDialog open={confirming} title="Delete this report?" message="This report will be permanently deleted."
-        loading={deleting} onConfirm={handleDelete} onCancel={() => setConfirming(false)} />
+      <ConfirmDialog
+        open={confirming}
+        title="Delete this report?"
+        message="This report will be permanently deleted."
+        loading={deleting}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirming(false)}
+      />
     </div>
   );
 }

@@ -1,5 +1,16 @@
 // Ratings out of 100 as progress bars. Goalkeepers get their own attributes.
-const OUTFIELD = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical', 'finishing', 'crossing', 'longShots', 'positioning'];
+const OUTFIELD = [
+  'pace',
+  'shooting',
+  'passing',
+  'dribbling',
+  'defending',
+  'physical',
+  'finishing',
+  'crossing',
+  'longShots',
+  'positioning',
+];
 const KEEPER = ['diving', 'handling', 'kicking', 'reflexes', 'positioning', 'passing', 'physical', 'pace'];
 const LABELS = { longShots: 'Long shots' };
 

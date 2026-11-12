@@ -6,7 +6,8 @@ const request = require('supertest');
 const app = require('../src/app');
 
 test('allows the frontend even when CLIENT_URL ends with a slash', async () => {
-  const res = await request(app).options('/api/auth/login')
+  const res = await request(app)
+    .options('/api/auth/login')
     .set('Origin', 'https://ase-athletics-assessment-delta.vercel.app')
     .set('Access-Control-Request-Method', 'POST');
   expect(res.headers['access-control-allow-origin']).toBe('https://ase-athletics-assessment-delta.vercel.app');

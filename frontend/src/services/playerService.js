@@ -10,7 +10,8 @@ function toParams(params = {}) {
 }
 
 export const getPlayers = (params) => api.get('/players', { params: toParams(params) }).then((r) => r.data);
-export const searchPlayers = (q, limit = 8) => api.get('/players/search', { params: { q, limit } }).then((r) => r.data.data);
+export const searchPlayers = (q, limit = 8) =>
+  api.get('/players/search', { params: { q, limit } }).then((r) => r.data.data);
 export const getFilterOptions = () => api.get('/players/filters').then((r) => r.data.data);
 export const getPlayer = (id) => api.get(`/players/${id}`).then((r) => r.data.data);
 export const createPlayer = (data) => api.post('/players', data).then((r) => r.data.data);

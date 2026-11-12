@@ -33,7 +33,13 @@ describe('formatting', () => {
 describe('chart data', () => {
   test('merges players with different valuation dates into one row per date, in order', () => {
     const rows = buildTrendRows([
-      { name: 'A', history: [{ date: '2024-01-01', value: 10 }, { date: '2025-01-01', value: 20 }] },
+      {
+        name: 'A',
+        history: [
+          { date: '2024-01-01', value: 10 },
+          { date: '2025-01-01', value: 20 },
+        ],
+      },
       { name: 'B', history: [{ date: '2025-01-01', value: 5 }] },
     ]);
     expect(rows).toHaveLength(2);

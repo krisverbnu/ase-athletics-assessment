@@ -6,8 +6,14 @@ export default function StatTile({ label, value, detail, icon: Icon }) {
         <p className="text-xs font-medium uppercase tracking-wide text-secondary-500">{label}</p>
         {Icon && <Icon className="size-5 text-secondary-400" aria-hidden />}
       </div>
-      <p className="mt-2 truncate text-2xl font-bold tabular-nums text-secondary-900" title={String(value)}>{value}</p>
-      {detail && <p className="mt-1 truncate text-sm text-secondary-500" title={String(detail)}>{detail}</p>}
+      <p className="mt-2 truncate text-2xl font-bold tabular-nums text-secondary-900" title={String(value)}>
+        {value}
+      </p>
+      {detail && (
+        <p className="mt-1 truncate text-sm text-secondary-500" title={String(detail)}>
+          {detail}
+        </p>
+      )}
     </div>
   );
 }

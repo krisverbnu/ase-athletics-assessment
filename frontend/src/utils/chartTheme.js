@@ -25,4 +25,9 @@ export const LINE_CURSOR = { stroke: '#cbd5e1', strokeDasharray: '3 3' };
 
 // Legend: keep series in the order they're drawn. Recharts sorts alphabetically by
 // default, which put "Assists" before "Goals" even though the Goals bar comes first.
-export const LEGEND = { wrapperStyle: { fontSize: 13, paddingTop: 8 }, iconType: 'circle', iconSize: 10, itemSorter: null };
+export const LEGEND = {
+  wrapperStyle: { fontSize: 13, paddingTop: 8 },
+  iconType: 'circle',
+  iconSize: 10,
+  itemSorter: null,
+};

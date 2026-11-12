@@ -57,10 +57,18 @@ describe('API', () => {
   test('unknown email and wrong password get the same message', async () => {
     // Same answer either way, so nobody can use the login form to find out who has an account
     prisma.user.findUnique.mockResolvedValueOnce(null);
-    const unknown = await request(app).post('/api/auth/login').send({ email: 'nobody@example.com', password: 'whatever1' });
+    const unknown = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'nobody@example.com', password: 'whatever1' });
 
-    prisma.user.findUnique.mockResolvedValueOnce({ id: 1, email: 'demo@ase-athletics.com', passwordHash: bcrypt.hashSync('demo123', 4) });
-    const wrong = await request(app).post('/api/auth/login').send({ email: 'demo@ase-athletics.com', password: 'wrong-password' });
+    prisma.user.findUnique.mockResolvedValueOnce({
+      id: 1,
+      email: 'demo@ase-athletics.com',
+      passwordHash: bcrypt.hashSync('demo123', 4),
+    });
+    const wrong = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'demo@ase-athletics.com', password: 'wrong-password' });
 
     expect(unknown.status).toBe(401);
     expect(wrong.status).toBe(401);

@@ -15,8 +15,14 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'De
   }, [open]);
 
   return (
-    <dialog ref={ref} onCancel={(e) => { e.preventDefault(); onCancel(); }}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-lg p-0 shadow-xl backdrop:bg-secondary-900/50">
+    <dialog
+      ref={ref}
+      onCancel={(e) => {
+        e.preventDefault();
+        onCancel();
+      }}
+      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-lg p-0 shadow-xl backdrop:bg-secondary-900/50"
+    >
       <div className="p-6">
         <div className="flex gap-4">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-100">
@@ -28,8 +34,12 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'De
           </div>
         </div>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onCancel} disabled={loading}>Cancel</Button>
-          <Button variant="danger" onClick={onConfirm} loading={loading}>{confirmLabel}</Button>
+          <Button variant="secondary" onClick={onCancel} disabled={loading}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={onConfirm} loading={loading}>
+            {confirmLabel}
+          </Button>
         </div>
       </div>
     </dialog>

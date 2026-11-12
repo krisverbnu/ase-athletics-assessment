@@ -11,14 +11,25 @@ export function formatMoney(value) {
 // "2027-06-30T00:00:00.000Z" -> "30 Jun 2027"
 export function formatDate(value) {
   if (!value) return 'Not available';
-  return new Date(value).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  return new Date(value).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 // "2027-06-30T00:00:00.000Z" -> "2027-06-30" (for <input type="date">)
 export const toInputDate = (value) => (value ? new Date(value).toISOString().slice(0, 10) : '');
 
 export const initials = (name = '') =>
-  name.split(/\s+/).filter(Boolean).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+  name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
 
 // One colour per position, from ASE's chart palette. The same colour is used for the badge
 // and in every chart, so "violet = Forward" everywhere. Red is left out on purpose: it's

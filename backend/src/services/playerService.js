@@ -41,9 +41,7 @@ function buildWhere(f = {}) {
 const NULLABLE_SORTS = ['marketValue', 'contractEnd'];
 
 function buildOrderBy(sort, order) {
-  const primary = NULLABLE_SORTS.includes(sort)
-    ? { [sort]: { sort: order, nulls: 'last' } }
-    : { [sort]: order };
+  const primary = NULLABLE_SORTS.includes(sort) ? { [sort]: { sort: order, nulls: 'last' } } : { [sort]: order };
   return [primary, { id: 'asc' }]; // id as tie-breaker keeps pages stable
 }
 
@@ -102,7 +100,11 @@ async function getPlayer(id) {
 async function getFilterOptions() {
   const [teams, nationalities, agg] = await Promise.all([
     prisma.player.findMany({ distinct: ['team'], select: { team: true }, orderBy: { team: 'asc' } }),
-    prisma.player.findMany({ distinct: ['nationality'], select: { nationality: true }, orderBy: { nationality: 'asc' } }),
+    prisma.player.findMany({
+      distinct: ['nationality'],
+      select: { nationality: true },
+      orderBy: { nationality: 'asc' },
+    }),
     prisma.player.aggregate({
       _min: { age: true, marketValue: true, goals: true, assists: true },
       _max: { age: true, marketValue: true, goals: true, assists: true },
@@ -125,7 +127,10 @@ async function getFilterOptions() {
 function toPlayerData(body) {
   const { attributes, contractEnd, ...fields } = body;
   return {
-    fields: { ...fields, ...(contractEnd !== undefined && { contractEnd: contractEnd ? new Date(contractEnd) : null }) },
+    fields: {
+      ...fields,
+      ...(contractEnd !== undefined && { contractEnd: contractEnd ? new Date(contractEnd) : null }),
+    },
     attributes,
   };
 }
@@ -158,6 +163,12 @@ async function deletePlayer(id) {
 }
 
 module.exports = {
-  buildWhere, listPlayers, searchPlayers, getPlayer, getFilterOptions,
-  createPlayer, updatePlayer, deletePlayer,
+  buildWhere,
+  listPlayers,
+  searchPlayers,
+  getPlayer,
+  getFilterOptions,
+  createPlayer,
+  updatePlayer,
+  deletePlayer,
 };

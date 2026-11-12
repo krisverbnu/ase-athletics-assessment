@@ -2,7 +2,9 @@ import { initials, POSITION_STYLES, RECOMMENDATIONS } from '../../utils/format';
 
 export function PositionBadge({ position }) {
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${POSITION_STYLES[position] || 'bg-secondary-100 text-secondary-700'}`}>
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${POSITION_STYLES[position] || 'bg-secondary-100 text-secondary-700'}`}
+    >
       {position}
     </span>
   );
@@ -12,7 +14,10 @@ export function PositionBadge({ position }) {
 export function Avatar({ name, size = 'md' }) {
   const sizes = { sm: 'size-9 text-xs', md: 'size-12 text-sm', lg: 'size-20 text-2xl' };
   return (
-    <div aria-hidden className={`flex shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-800 ${sizes[size]}`}>
+    <div
+      aria-hidden
+      className={`flex shrink-0 items-center justify-center rounded-full bg-primary-100 font-semibold text-primary-800 ${sizes[size]}`}
+    >
       {initials(name)}
     </div>
   );
@@ -21,5 +26,7 @@ export function Avatar({ name, size = 'md' }) {
 export function RecommendationBadge({ value }) {
   const rec = RECOMMENDATIONS[value];
   if (!rec) return null;
-  return <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${rec.style}`}>{rec.label}</span>;
+  return (
+    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${rec.style}`}>{rec.label}</span>
+  );
 }

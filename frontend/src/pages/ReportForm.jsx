@@ -32,9 +32,21 @@ const CATEGORIES = [
 const LIST_FIELDS = ['strengths', 'weaknesses', 'keyMoments'];
 
 const EMPTY = {
-  matchDate: '', opponent: '', competition: '', venue: '', result: '', minutesPlayed: '', positionPlayed: '',
+  matchDate: '',
+  opponent: '',
+  competition: '',
+  venue: '',
+  result: '',
+  minutesPlayed: '',
+  positionPlayed: '',
   ...Object.fromEntries(CATEGORIES.map(([key]) => [key, 6])),
-  overallRating: 6, strengths: '', weaknesses: '', keyMoments: '', recommendation: '', summary: '', notes: '',
+  overallRating: 6,
+  strengths: '',
+  weaknesses: '',
+  keyMoments: '',
+  recommendation: '',
+  summary: '',
+  notes: '',
 };
 
 // Report from the API -> form values (lists become one item per line)
@@ -50,8 +62,13 @@ function toForm(r) {
 // Form values -> API data
 function toPayload(form, playerId) {
   const out = { ...form, playerId };
-  for (const key of LIST_FIELDS) out[key] = form[key].split('\n').map((s) => s.trim()).filter(Boolean);
-  for (const key of ['competition', 'venue', 'result', 'positionPlayed', 'summary', 'notes']) out[key] = form[key].trim() || null;
+  for (const key of LIST_FIELDS)
+    out[key] = form[key]
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  for (const key of ['competition', 'venue', 'result', 'positionPlayed', 'summary', 'notes'])
+    out[key] = form[key].trim() || null;
   out.minutesPlayed = form.minutesPlayed === '' ? null : Number(form.minutesPlayed);
   for (const [key] of CATEGORIES) out[key] = Number(form[key]);
   out.overallRating = Number(form.overallRating);
@@ -71,13 +88,25 @@ function RatingSlider({ id, label, hint, value, onChange }) {
   return (
     <div>
       <div className="flex items-baseline justify-between gap-2">
-        <label htmlFor={id} className="text-sm font-medium text-secondary-700">{label}</label>
-        <span className="text-sm tabular-nums"><span className="font-bold text-secondary-900">{value}</span>
-          <span className="text-secondary-500"> · {ratingLabel(value)}</span></span>
+        <label htmlFor={id} className="text-sm font-medium text-secondary-700">
+          {label}
+        </label>
+        <span className="text-sm tabular-nums">
+          <span className="font-bold text-secondary-900">{value}</span>
+          <span className="text-secondary-500"> · {ratingLabel(value)}</span>
+        </span>
       </div>
       {hint && <p className="text-xs text-secondary-500">{hint}</p>}
-      <input id={id} type="range" min="1" max="10" step="1" value={value} onChange={(e) => onChange(Number(e.target.value))}
-        className="mt-2 h-2 w-full cursor-pointer accent-primary-700" />
+      <input
+        id={id}
+        type="range"
+        min="1"
+        max="10"
+        step="1"
+        value={value}
+        onChange={(e) => onChange(Number(e.target.value))}
+        className="mt-2 h-2 w-full cursor-pointer accent-primary-700"
+      />
     </div>
   );
 }
@@ -85,8 +114,10 @@ function RatingSlider({ id, label, hint, value, onChange }) {
 function focusFirstError() {
   requestAnimationFrame(() => {
     const field = document.querySelector('[aria-invalid="true"], [data-error="true"]');
-    if (field) { field.focus?.(); field.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-    else window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (field) {
+      field.focus?.();
+      field.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 }
 
@@ -114,12 +145,17 @@ export default function ReportForm() {
             setLoadState({ loading: false, error: `Only ${r.scout.name} can edit this report.` });
             return;
           }
-          setForm(toForm(r)); setPlayer(r.player); setLoadState({ loading: false, error: null });
+          setForm(toForm(r));
+          setPlayer(r.player);
+          setLoadState({ loading: false, error: null });
         })
         .catch((err) => setLoadState({ loading: false, error: getErrorMessage(err) }));
     } else if (presetPlayerId) {
       getPlayer(presetPlayerId)
-        .then((p) => { setPlayer(p); setLoadState({ loading: false, error: null }); })
+        .then((p) => {
+          setPlayer(p);
+          setLoadState({ loading: false, error: null });
+        })
         .catch(() => setLoadState({ loading: false, error: null })); // just pick a player manually
     }
   }, [id, isEdit, presetPlayerId, user?.id]);
@@ -136,10 +172,16 @@ export default function ReportForm() {
     const found = validate(form, player);
     setErrors(found);
     setFormError('');
-    if (Object.keys(found).length) { setFormError('Please fix the highlighted fields.'); focusFirstError(); return; }
+    if (Object.keys(found).length) {
+      setFormError('Please fix the highlighted fields.');
+      focusFirstError();
+      return;
+    }
     setSaving(true);
     try {
-      const saved = isEdit ? await updateReport(id, toPayload(form, player.id)) : await createReport(toPayload(form, player.id));
+      const saved = isEdit
+        ? await updateReport(id, toPayload(form, player.id))
+        : await createReport(toPayload(form, player.id));
       toast.success(isEdit ? 'Report updated.' : 'Report saved.');
       navigate(`/reports/${saved.id}`);
     } catch (err) {
@@ -160,8 +202,14 @@ export default function ReportForm() {
       <Link to={backTo} className="inline-flex items-center gap-1 text-sm text-secondary-600 hover:text-primary-700">
         <ArrowLeft className="size-4" aria-hidden /> Back
       </Link>
-      <h1 className="text-2xl font-bold text-secondary-900">{isEdit ? 'Edit scouting report' : 'Write a scouting report'}</h1>
-      {formError && <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>}
+      <h1 className="text-2xl font-bold text-secondary-900">
+        {isEdit ? 'Edit scouting report' : 'Write a scouting report'}
+      </h1>
+      {formError && (
+        <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+          {formError}
+        </p>
+      )}
 
       <Card title="Player and match">
         <div className="flex flex-col gap-4">
@@ -169,15 +217,30 @@ export default function ReportForm() {
             <div className="flex items-center justify-between rounded-md border border-secondary-200 bg-secondary-50 px-4 py-3">
               <div>
                 <p className="font-semibold text-secondary-900">{player.name}</p>
-                <p className="mt-1 flex items-center gap-2 text-sm text-secondary-500"><PositionBadge position={player.position} /> {player.team}</p>
+                <p className="mt-1 flex items-center gap-2 text-sm text-secondary-500">
+                  <PositionBadge position={player.position} /> {player.team}
+                </p>
               </div>
               {!isEdit && (
-                <button type="button" onClick={() => setPlayer(null)} aria-label="Change player"
-                  className="rounded p-1 text-secondary-500 hover:text-secondary-800"><X className="size-5" /></button>
+                <button
+                  type="button"
+                  onClick={() => setPlayer(null)}
+                  aria-label="Change player"
+                  className="rounded p-1 text-secondary-500 hover:text-secondary-800"
+                >
+                  <X className="size-5" />
+                </button>
               )}
             </div>
           ) : (
-            <PlayerPicker label="Player watched *" onSelect={(p) => { setPlayer(p); setErrors((e) => ({ ...e, playerId: undefined })); }} error={errors.playerId} />
+            <PlayerPicker
+              label="Player watched *"
+              onSelect={(p) => {
+                setPlayer(p);
+                setErrors((e) => ({ ...e, playerId: undefined }));
+              }}
+              error={errors.playerId}
+            />
           )}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <TextField label="Match date" type="date" required {...field('matchDate')} />
@@ -191,15 +254,28 @@ export default function ReportForm() {
       </Card>
 
       <Card title="Ratings (1–10)">
-        <p className="-mt-2 mb-5 text-sm text-secondary-500">1–2 very poor · 3–4 poor · 5–6 average · 7–8 good · 9–10 excellent</p>
+        <p className="-mt-2 mb-5 text-sm text-secondary-500">
+          1–2 very poor · 3–4 poor · 5–6 average · 7–8 good · 9–10 excellent
+        </p>
         <div className="grid gap-x-10 gap-y-6 md:grid-cols-2">
           {CATEGORIES.map(([key, hint]) => (
-            <RatingSlider key={key} id={`rating-${key}`} label={key === 'workRate' ? 'Work rate' : key.charAt(0).toUpperCase() + key.slice(1)}
-              hint={hint} value={form[key]} onChange={setValue(key)} />
+            <RatingSlider
+              key={key}
+              id={`rating-${key}`}
+              label={key === 'workRate' ? 'Work rate' : key.charAt(0).toUpperCase() + key.slice(1)}
+              hint={hint}
+              value={form[key]}
+              onChange={setValue(key)}
+            />
           ))}
         </div>
         <div className="mt-8 border-t border-secondary-200 pt-6">
-          <RatingSlider id="rating-overall" label="Overall rating" value={form.overallRating} onChange={setValue('overallRating')} />
+          <RatingSlider
+            id="rating-overall"
+            label="Overall rating"
+            value={form.overallRating}
+            onChange={setValue('overallRating')}
+          />
         </div>
       </Card>
 
@@ -207,10 +283,16 @@ export default function ReportForm() {
         <div className="grid gap-4 md:grid-cols-2">
           <TextAreaField label="Strengths" hint="One per line." {...field('strengths')} />
           <TextAreaField label="Weaknesses" hint="One per line." {...field('weaknesses')} />
-          <TextAreaField label="Key moments" hint="One per line, e.g. 78': first-time finish for the winner." {...field('keyMoments')} />
+          <TextAreaField
+            label="Key moments"
+            hint="One per line, e.g. 78': first-time finish for the winner."
+            {...field('keyMoments')}
+          />
           <TextAreaField label="Overall assessment" hint="Your verdict in a few sentences." {...field('summary')} />
         </div>
-        <div className="mt-4"><TextAreaField label="Other notes" rows={3} {...field('notes')} /></div>
+        <div className="mt-4">
+          <TextAreaField label="Other notes" rows={3} {...field('notes')} />
+        </div>
       </Card>
 
       <Card title="Recommendation">
@@ -220,10 +302,21 @@ export default function ReportForm() {
             {Object.entries(RECOMMENDATIONS).map(([value, rec]) => {
               const on = form.recommendation === value;
               return (
-                <label key={value} className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-3 ${on ? 'border-primary-700 bg-primary-50' : 'border-secondary-200 hover:border-secondary-300'}`}>
-                  <input type="radio" name="recommendation" value={value} checked={on}
-                    onChange={() => { setValue('recommendation')(value); setErrors((e) => ({ ...e, recommendation: undefined })); }}
-                    className="size-4 accent-primary-700" />
+                <label
+                  key={value}
+                  className={`flex cursor-pointer items-center gap-3 rounded-lg border-2 px-4 py-3 ${on ? 'border-primary-700 bg-primary-50' : 'border-secondary-200 hover:border-secondary-300'}`}
+                >
+                  <input
+                    type="radio"
+                    name="recommendation"
+                    value={value}
+                    checked={on}
+                    onChange={() => {
+                      setValue('recommendation')(value);
+                      setErrors((e) => ({ ...e, recommendation: undefined }));
+                    }}
+                    className="size-4 accent-primary-700"
+                  />
                   <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${rec.style}`}>{rec.label}</span>
                 </label>
               );
@@ -234,8 +327,14 @@ export default function ReportForm() {
       </Card>
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link to={backTo}><Button variant="secondary" className="w-full">Cancel</Button></Link>
-        <Button type="submit" loading={saving}>{isEdit ? 'Save changes' : 'Save report'}</Button>
+        <Link to={backTo}>
+          <Button variant="secondary" className="w-full">
+            Cancel
+          </Button>
+        </Link>
+        <Button type="submit" loading={saving}>
+          {isEdit ? 'Save changes' : 'Save report'}
+        </Button>
       </div>
     </form>
   );

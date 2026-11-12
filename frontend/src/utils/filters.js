@@ -38,14 +38,24 @@ export function filtersToParams(filters) {
 // How many filters are switched on (for the "Filters (3)" badge)
 export function countActive(filters) {
   const lists = LIST_FILTERS.reduce((n, k) => n + (filters[k]?.length || 0), 0);
-  const ranges = RANGE_FILTERS.filter((k) => filters[k + 'Min'] !== undefined || filters[k + 'Max'] !== undefined).length;
+  const ranges = RANGE_FILTERS.filter(
+    (k) => filters[k + 'Min'] !== undefined || filters[k + 'Max'] !== undefined,
+  ).length;
   return lists + ranges;
 }
 
 // sessionStorage keeps filters while the tab is open (bonus: "filter state persistence")
 export function saveFilters(params) {
-  try { sessionStorage.setItem(STORAGE_KEY, params); } catch { /* storage blocked: not essential */ }
+  try {
+    sessionStorage.setItem(STORAGE_KEY, params);
+  } catch {
+    /* storage blocked: not essential */
+  }
 }
 export function loadSavedFilters() {
-  try { return sessionStorage.getItem(STORAGE_KEY) || ''; } catch { return ''; }
+  try {
+    return sessionStorage.getItem(STORAGE_KEY) || '';
+  } catch {
+    return '';
+  }
 }

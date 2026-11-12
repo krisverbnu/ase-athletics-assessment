@@ -1,5 +1,6 @@
-# Runs on every push and pull request: backend tests, frontend lint and build.
-# A green tick on GitHub means all three passed.
+# Runs on every push and pull request. A green tick on GitHub means the backend
+# and frontend both pass their linters, formatting checks and tests, and the
+# frontend builds for production.
 name: CI
 
 on: [push, pull_request]
@@ -18,6 +19,8 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      - run: npm run lint
+      - run: npm run format:check
       - run: npm test
 
   frontend:
@@ -34,5 +37,6 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run lint
+      - run: npm run format:check
       - run: npm test
       - run: npm run build

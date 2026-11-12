@@ -20,10 +20,17 @@ export function useApi(fetcher, deps) {
 
   useEffect(() => {
     let cancelled = false;
-    fetcherRef.current()
-      .then((data) => { if (!cancelled) setResult({ key, data, error: null }); })
-      .catch((err) => { if (!cancelled) setResult({ key, data: null, error: getErrorMessage(err) }); });
-    return () => { cancelled = true; };
+    fetcherRef
+      .current()
+      .then((data) => {
+        if (!cancelled) setResult({ key, data, error: null });
+      })
+      .catch((err) => {
+        if (!cancelled) setResult({ key, data: null, error: getErrorMessage(err) });
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [key]);
 
   const loading = result.key !== key;

@@ -42,7 +42,13 @@ describe('seed: helpers', () => {
   });
 
   test('turns an overall rating into SIGN / MONITOR / PASS', () => {
-    expect([10, 9, 8, 6, 5, 1].map(recommendationFromRating))
-      .toEqual(['SIGN', 'SIGN', 'MONITOR', 'MONITOR', 'PASS', 'PASS']);
+    expect([10, 9, 8, 6, 5, 1].map(recommendationFromRating)).toEqual([
+      'SIGN',
+      'SIGN',
+      'MONITOR',
+      'MONITOR',
+      'PASS',
+      'PASS',
+    ]);
   });
 });

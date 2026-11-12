@@ -3,7 +3,19 @@
 // so the back button works, refreshing keeps your view, and a view can be shared as a link.
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
-import { ArrowDown, ArrowUp, ArrowUpDown, Download, GitCompare, Plus, Search, SearchX, SlidersHorizontal, Users, X } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Download,
+  GitCompare,
+  Plus,
+  Search,
+  SearchX,
+  SlidersHorizontal,
+  Users,
+  X,
+} from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
 import Highlight from '../components/common/Highlight';
@@ -42,9 +54,14 @@ function CompareBox({ player, checked, disabled, onToggle }) {
     // The padding around the box makes a ~40px tap target on phones; the negative margin
     // keeps it looking the same size. stopPropagation stops the tap opening the player.
     <label className="-m-3 inline-flex cursor-pointer p-3" onClick={(e) => e.stopPropagation()}>
-      <input type="checkbox" checked={checked} disabled={disabled} onChange={() => onToggle(player.id)}
+      <input
+        type="checkbox"
+        checked={checked}
+        disabled={disabled}
+        onChange={() => onToggle(player.id)}
         aria-label={`Select ${player.name} for comparison`}
-        className="size-4 cursor-pointer accent-primary-700 disabled:cursor-not-allowed" />
+        className="size-4 cursor-pointer accent-primary-700 disabled:cursor-not-allowed"
+      />
     </label>
   );
 }
@@ -65,9 +82,10 @@ export default function Players() {
   const [exporting, setExporting] = useState(false);
   const [compareIds, setCompareIds] = useState([]); // players ticked for comparison
 
-  const toggleCompare = (id) => setCompareIds((ids) => (ids.includes(id)
-    ? ids.filter((x) => x !== id)
-    : ids.length < MAX_COMPARE ? [...ids, id] : ids));
+  const toggleCompare = (id) =>
+    setCompareIds((ids) =>
+      ids.includes(id) ? ids.filter((x) => x !== id) : ids.length < MAX_COMPARE ? [...ids, id] : ids,
+    );
 
   // Write a new view into the URL. Anything not mentioned in `changes` stays as it is.
   const setView = (changes) => {
@@ -88,7 +106,9 @@ export default function Players() {
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Remember the current view for this browser tab (bonus: filter persistence)
-  useEffect(() => { saveFilters(params.toString()); }, [params]);
+  useEffect(() => {
+    saveFilters(params.toString());
+  }, [params]);
 
   // Debounce: only search 300 ms after the user stops typing
   useEffect(() => {
@@ -104,13 +124,17 @@ export default function Players() {
     [page, sort, order, q, filterKey],
   );
 
-  const toggleSort = (key) => setView({
-    sort: key,
-    order: sort === key ? (order === 'asc' ? 'desc' : 'asc') : defaultOrder(key),
-    page: 1,
-  });
+  const toggleSort = (key) =>
+    setView({
+      sort: key,
+      order: sort === key ? (order === 'asc' ? 'desc' : 'asc') : defaultOrder(key),
+      page: 1,
+    });
 
-  const clearAll = () => { setSearchText(''); setView({ q: '', filters: readFilters(new URLSearchParams()), page: 1 }); };
+  const clearAll = () => {
+    setSearchText('');
+    setView({ q: '', filters: readFilters(new URLSearchParams()), page: 1 });
+  };
 
   // Export every player matching the current search and filters, not just this page
   async function handleExport() {
@@ -141,7 +165,11 @@ export default function Players() {
 
   const SortIcon = ({ column }) => {
     if (sort !== column) return <ArrowUpDown className="size-3.5 text-secondary-400" aria-hidden />;
-    return order === 'asc' ? <ArrowUp className="size-3.5" aria-hidden /> : <ArrowDown className="size-3.5" aria-hidden />;
+    return order === 'asc' ? (
+      <ArrowUp className="size-3.5" aria-hidden />
+    ) : (
+      <ArrowDown className="size-3.5" aria-hidden />
+    );
   };
 
   return (
@@ -152,15 +180,28 @@ export default function Players() {
           <p className="mt-1 text-sm text-secondary-500">Search, filter and sort every player in the database.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="secondary" icon={Download} loading={exporting} onClick={handleExport} disabled={!data?.meta.total}>Export CSV</Button>
-          <Link to="/players/new"><Button icon={Plus}>Add player</Button></Link>
+          <Button
+            variant="secondary"
+            icon={Download}
+            loading={exporting}
+            onClick={handleExport}
+            disabled={!data?.meta.total}
+          >
+            Export CSV
+          </Button>
+          <Link to="/players/new">
+            <Button icon={Plus}>Add player</Button>
+          </Link>
         </div>
       </div>
 
       {/* Search + filter toggle */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
-          <Search className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-secondary-400" aria-hidden />
+          <Search
+            className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-secondary-400"
+            aria-hidden
+          />
           <input
             type="text"
             enterKeyHint="search"
@@ -171,14 +212,24 @@ export default function Players() {
             className="h-12 w-full rounded-md border border-secondary-300 bg-white pl-12 pr-12 text-sm focus:border-primary-500 focus:outline-none focus:ring-3 focus:ring-primary-500/15"
           />
           {searchText && (
-            <button type="button" onClick={() => setSearchText('')} aria-label="Clear search"
-              className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-secondary-400 hover:text-secondary-700">
+            <button
+              type="button"
+              onClick={() => setSearchText('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded p-1 text-secondary-400 hover:text-secondary-700"
+            >
               <X className="size-5" />
             </button>
           )}
         </div>
-        <Button variant={showFilters ? 'primary' : 'secondary'} icon={SlidersHorizontal} className="h-12"
-          onClick={() => setShowFilters(!showFilters)} aria-expanded={showFilters} aria-controls="filter-panel">
+        <Button
+          variant={showFilters ? 'primary' : 'secondary'}
+          icon={SlidersHorizontal}
+          className="h-12"
+          onClick={() => setShowFilters(!showFilters)}
+          aria-expanded={showFilters}
+          aria-controls="filter-panel"
+        >
           Filters{activeCount > 0 && ` (${activeCount})`}
         </Button>
       </div>
@@ -196,8 +247,14 @@ export default function Players() {
       {/* Phones have no column headers to click, so sorting is a dropdown */}
       <label className="flex items-center gap-2 text-sm text-secondary-700 md:hidden">
         Sort by
-        <select value={`${sort}:${order}`} onChange={(e) => { const [s, o] = e.target.value.split(':'); setView({ sort: s, order: o, page: 1 }); }}
-          className="flex-1 rounded-md border border-secondary-300 bg-white px-3 py-2.5">
+        <select
+          value={`${sort}:${order}`}
+          onChange={(e) => {
+            const [s, o] = e.target.value.split(':');
+            setView({ sort: s, order: o, page: 1 });
+          }}
+          className="flex-1 rounded-md border border-secondary-300 bg-white px-3 py-2.5"
+        >
           <option value="name:asc">Name (A–Z)</option>
           <option value="goals:desc">Most goals</option>
           <option value="assists:desc">Most assists</option>
@@ -210,12 +267,38 @@ export default function Players() {
 
       <Card flush className="overflow-hidden">
         {loading && <ListSkeleton label="Loading players..." />}
-        {error && <div className="p-6"><ErrorState message={error} onRetry={reload} /></div>}
-        {data && data.data.length === 0 && (q || activeCount
-          ? <EmptyState icon={SearchX} title="No players match" message="Try a different search, or remove some filters."
-              action={<Button variant="secondary" size="sm" onClick={clearAll}>Clear search and filters</Button>} />
-          : <EmptyState icon={Users} title="No players yet" message="Add the first player to get started."
-              action={<Link to="/players/new"><Button size="sm" icon={Plus}>Add player</Button></Link>} />)}
+        {error && (
+          <div className="p-6">
+            <ErrorState message={error} onRetry={reload} />
+          </div>
+        )}
+        {data &&
+          data.data.length === 0 &&
+          (q || activeCount ? (
+            <EmptyState
+              icon={SearchX}
+              title="No players match"
+              message="Try a different search, or remove some filters."
+              action={
+                <Button variant="secondary" size="sm" onClick={clearAll}>
+                  Clear search and filters
+                </Button>
+              }
+            />
+          ) : (
+            <EmptyState
+              icon={Users}
+              title="No players yet"
+              message="Add the first player to get started."
+              action={
+                <Link to="/players/new">
+                  <Button size="sm" icon={Plus}>
+                    Add player
+                  </Button>
+                </Link>
+              }
+            />
+          ))}
 
         {data && data.data.length > 0 && (
           <>
@@ -224,12 +307,21 @@ export default function Players() {
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-700">
                   <tr>
-                    <th scope="col" className="w-10 py-3 pl-4"><span className="sr-only">Compare</span></th>
+                    <th scope="col" className="w-10 py-3 pl-4">
+                      <span className="sr-only">Compare</span>
+                    </th>
                     {COLUMNS.map((c) => (
-                      <th key={c.key} scope="col" className={`px-4 py-3 font-semibold ${c.align === 'right' ? 'text-right' : ''}`}
-                        aria-sort={sort === c.key ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}>
-                        <button type="button" onClick={() => toggleSort(c.key)}
-                          className={`inline-flex items-center gap-1 uppercase hover:text-primary-700 ${sort === c.key ? 'text-primary-700' : ''}`}>
+                      <th
+                        key={c.key}
+                        scope="col"
+                        className={`px-4 py-3 font-semibold ${c.align === 'right' ? 'text-right' : ''}`}
+                        aria-sort={sort === c.key ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}
+                      >
+                        <button
+                          type="button"
+                          onClick={() => toggleSort(c.key)}
+                          className={`inline-flex items-center gap-1 uppercase hover:text-primary-700 ${sort === c.key ? 'text-primary-700' : ''}`}
+                        >
                           {c.label} <SortIcon column={c.key} />
                         </button>
                       </th>
@@ -238,30 +330,56 @@ export default function Players() {
                 </thead>
                 <tbody className="divide-y divide-secondary-100">
                   {data.data.map((p) => (
-                    <tr key={p.id} onClick={() => navigate(`/players/${p.id}`)} className="cursor-pointer transition-colors duration-150 hover:bg-primary-50/60">
+                    <tr
+                      key={p.id}
+                      onClick={() => navigate(`/players/${p.id}`)}
+                      className="cursor-pointer transition-colors duration-150 hover:bg-primary-50/60"
+                    >
                       <td className="py-3 pl-4">
-                        <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
-                          disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />
+                        <CompareBox
+                          player={p}
+                          checked={compareIds.includes(p.id)}
+                          onToggle={toggleCompare}
+                          disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE}
+                        />
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <Avatar name={p.name} size="sm" />
                           <div>
-                            <Link to={`/players/${p.id}`} onClick={(e) => e.stopPropagation()} className="font-semibold text-secondary-900 hover:text-primary-700">
+                            <Link
+                              to={`/players/${p.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="font-semibold text-secondary-900 hover:text-primary-700"
+                            >
                               <Highlight text={p.name} query={q} />
                             </Link>
-                            <p className="text-xs text-secondary-500"><Highlight text={p.nationality} query={q} /></p>
+                            <p className="text-xs text-secondary-500">
+                              <Highlight text={p.nationality} query={q} />
+                            </p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3"><PositionBadge position={p.position} /></td>
+                      <td className="px-4 py-3">
+                        <PositionBadge position={p.position} />
+                      </td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.age}</td>
-                      <td className="px-4 py-3"><Highlight text={p.team} query={q} /></td>
+                      <td className="px-4 py-3">
+                        <Highlight text={p.team} query={q} />
+                      </td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.goals}</td>
                       <td className="px-4 py-3 text-right tabular-nums">{p.assists}</td>
-                      <td className={`px-4 py-3 text-right tabular-nums ${p.marketValue == null ? 'text-secondary-400' : ''}`}
-                        title={p.marketValue == null ? 'Not provided in the source data' : undefined}>
-                        {p.marketValue == null ? <>n/a<span className="sr-only"> (not provided in the source data)</span></> : formatMoney(p.marketValue)}
+                      <td
+                        className={`px-4 py-3 text-right tabular-nums ${p.marketValue == null ? 'text-secondary-400' : ''}`}
+                        title={p.marketValue == null ? 'Not provided in the source data' : undefined}
+                      >
+                        {p.marketValue == null ? (
+                          <>
+                            n/a<span className="sr-only"> (not provided in the source data)</span>
+                          </>
+                        ) : (
+                          formatMoney(p.marketValue)
+                        )}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">{formatDate(p.contractEnd)}</td>
                     </tr>
@@ -275,19 +393,32 @@ export default function Players() {
               {data.data.map((p) => (
                 <li key={p.id} className="flex items-center">
                   <div className="flex items-center self-stretch pl-4">
-                    <CompareBox player={p} checked={compareIds.includes(p.id)} onToggle={toggleCompare}
-                      disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE} />
+                    <CompareBox
+                      player={p}
+                      checked={compareIds.includes(p.id)}
+                      onToggle={toggleCompare}
+                      disabled={!compareIds.includes(p.id) && compareIds.length >= MAX_COMPARE}
+                    />
                   </div>
                   {/* min-w-0 lets long names shorten with "..." instead of pushing the badge off screen */}
-                  <Link to={`/players/${p.id}`} className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 active:bg-secondary-50">
+                  <Link
+                    to={`/players/${p.id}`}
+                    className="flex min-w-0 flex-1 items-center gap-3 px-4 py-4 active:bg-secondary-50"
+                  >
                     <Avatar name={p.name} size="sm" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-semibold text-secondary-900"><Highlight text={p.name} query={q} /></p>
-                      <p className="truncate text-xs text-secondary-500"><Highlight text={p.team} query={q} /> · {p.age} yrs</p>
+                      <p className="truncate font-semibold text-secondary-900">
+                        <Highlight text={p.name} query={q} />
+                      </p>
+                      <p className="truncate text-xs text-secondary-500">
+                        <Highlight text={p.team} query={q} /> · {p.age} yrs
+                      </p>
                     </div>
                     <div className="shrink-0 text-right">
                       <PositionBadge position={p.position} />
-                      <p className="mt-1 text-xs text-secondary-600">{p.goals} G · {p.assists} A</p>
+                      <p className="mt-1 text-xs text-secondary-600">
+                        {p.goals} G · {p.assists} A
+                      </p>
                     </div>
                   </Link>
                 </li>
@@ -295,8 +426,16 @@ export default function Players() {
             </ul>
 
             <div className="border-t border-secondary-200 px-4 py-4">
-              <Pagination page={data.meta.page} totalPages={data.meta.totalPages} total={data.meta.total} limit={PAGE_SIZE}
-                onChange={(p) => { setView({ page: p }); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+              <Pagination
+                page={data.meta.page}
+                totalPages={data.meta.totalPages}
+                total={data.meta.total}
+                limit={PAGE_SIZE}
+                onChange={(p) => {
+                  setView({ page: p });
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
             </div>
           </>
         )}
@@ -310,10 +449,21 @@ export default function Players() {
             {compareIds.length < 2 && <span className="text-secondary-300 max-[25rem]:hidden"> · pick at least 2</span>}
           </p>
           <div className="flex shrink-0 items-center gap-2">
-            <button type="button" onClick={() => setCompareIds([])} className="px-2 text-sm text-secondary-300 hover:text-white">Clear</button>
-            <Link to={`/compare?ids=${compareIds.join(',')}`} aria-disabled={compareIds.length < 2}
-              onClick={(e) => compareIds.length < 2 && e.preventDefault()}>
-              <Button icon={GitCompare} size="sm" disabled={compareIds.length < 2}>Compare</Button>
+            <button
+              type="button"
+              onClick={() => setCompareIds([])}
+              className="px-2 text-sm text-secondary-300 hover:text-white"
+            >
+              Clear
+            </button>
+            <Link
+              to={`/compare?ids=${compareIds.join(',')}`}
+              aria-disabled={compareIds.length < 2}
+              onClick={(e) => compareIds.length < 2 && e.preventDefault()}
+            >
+              <Button icon={GitCompare} size="sm" disabled={compareIds.length < 2}>
+                Compare
+              </Button>
             </Link>
           </div>
         </div>

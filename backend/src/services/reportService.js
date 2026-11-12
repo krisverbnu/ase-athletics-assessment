@@ -37,7 +37,8 @@ async function getReport(id) {
 
 async function ensurePlayerExists(playerId) {
   const player = await prisma.player.findUnique({ where: { id: playerId }, select: { id: true } });
-  if (!player) throw new HttpError(400, 'That player does not exist.', [{ field: 'playerId', message: 'Player not found' }]);
+  if (!player)
+    throw new HttpError(400, 'That player does not exist.', [{ field: 'playerId', message: 'Player not found' }]);
 }
 
 async function createReport(body, scoutId) {

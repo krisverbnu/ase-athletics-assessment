@@ -34,15 +34,48 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout title="Welcome back" subtitle="Log in to your scouting workspace."
-      footer={<>No account yet? <Link to="/register" className="font-semibold text-white underline">Create one</Link></>}>
+    <AuthLayout
+      title="Welcome back"
+      subtitle="Log in to your scouting workspace."
+      footer={
+        <>
+          No account yet?{' '}
+          <Link to="/register" className="font-semibold text-white underline">
+            Create one
+          </Link>
+        </>
+      }
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        {error && <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-        <TextField label="Email" type="email" autoComplete="email" value={form.email} onChange={update('email')} required />
-        <TextField label="Password" type="password" autoComplete="current-password" value={form.password} onChange={update('password')} required />
-        <Button type="submit" loading={loading} className="mt-2 w-full">Log in</Button>
-        <button type="button" onClick={() => setForm({ email: 'demo@ase-athletics.com', password: 'demo123' })}
-          className="text-sm text-primary-700 underline hover:text-primary-900">
+        {error && (
+          <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+            {error}
+          </p>
+        )}
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={form.email}
+          onChange={update('email')}
+          required
+        />
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          value={form.password}
+          onChange={update('password')}
+          required
+        />
+        <Button type="submit" loading={loading} className="mt-2 w-full">
+          Log in
+        </Button>
+        <button
+          type="button"
+          onClick={() => setForm({ email: 'demo@ase-athletics.com', password: 'demo123' })}
+          className="text-sm text-primary-700 underline hover:text-primary-900"
+        >
           Use the demo account
         </button>
       </form>

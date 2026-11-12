@@ -47,15 +47,54 @@ export default function Register() {
   }
 
   return (
-    <AuthLayout title="Create your account" subtitle="Start scouting in under a minute."
-      footer={<>Already registered? <Link to="/login" className="font-semibold text-white underline">Log in</Link></>}>
+    <AuthLayout
+      title="Create your account"
+      subtitle="Start scouting in under a minute."
+      footer={
+        <>
+          Already registered?{' '}
+          <Link to="/login" className="font-semibold text-white underline">
+            Log in
+          </Link>
+        </>
+      }
+    >
       <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-        {formError && <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>}
-        <TextField label="Full name" autoComplete="name" value={form.name} onChange={update('name')} error={errors.name} required />
-        <TextField label="Email" type="email" autoComplete="email" value={form.email} onChange={update('email')} error={errors.email} required />
-        <TextField label="Password" type="password" autoComplete="new-password" value={form.password} onChange={update('password')}
-          error={errors.password} hint="At least 8 characters." required />
-        <Button type="submit" loading={loading} className="mt-2 w-full">Create account</Button>
+        {formError && (
+          <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+            {formError}
+          </p>
+        )}
+        <TextField
+          label="Full name"
+          autoComplete="name"
+          value={form.name}
+          onChange={update('name')}
+          error={errors.name}
+          required
+        />
+        <TextField
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={form.email}
+          onChange={update('email')}
+          error={errors.email}
+          required
+        />
+        <TextField
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={form.password}
+          onChange={update('password')}
+          error={errors.password}
+          hint="At least 8 characters."
+          required
+        />
+        <Button type="submit" loading={loading} className="mt-2 w-full">
+          Create account
+        </Button>
       </form>
     </AuthLayout>
   );

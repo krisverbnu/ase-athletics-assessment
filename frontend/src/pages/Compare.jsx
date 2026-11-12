@@ -31,8 +31,18 @@ const TABS = {
       { label: 'Minutes', value: (p) => p.minutesPlayed, better: 'high', format: (v) => v.toLocaleString('en-GB') },
       { label: 'Goals', value: (p) => p.goals, better: 'high' },
       { label: 'Assists', value: (p) => p.assists, better: 'high' },
-      { label: 'Goals per 90', value: (p) => per90(p.goals, p.minutesPlayed), better: 'high', format: (v) => v.toFixed(2) },
-      { label: 'Assists per 90', value: (p) => per90(p.assists, p.minutesPlayed), better: 'high', format: (v) => v.toFixed(2) },
+      {
+        label: 'Goals per 90',
+        value: (p) => per90(p.goals, p.minutesPlayed),
+        better: 'high',
+        format: (v) => v.toFixed(2),
+      },
+      {
+        label: 'Assists per 90',
+        value: (p) => per90(p.assists, p.minutesPlayed),
+        better: 'high',
+        format: (v) => v.toFixed(2),
+      },
       { label: 'Shots on target', value: (p) => p.shotsOnTarget, better: 'high' },
       { label: 'Pass accuracy', value: (p) => p.passAccuracy, better: 'high', format: (v) => `${v}%` },
       { label: 'Tackles won', value: (p) => p.tacklesWon, better: 'high' },
@@ -42,8 +52,20 @@ const TABS = {
   },
   attributes: {
     label: 'Attributes',
-    rows: [...CORE_ATTRIBUTES, 'finishing', 'crossing', 'longShots', 'positioning', 'diving', 'handling', 'reflexes']
-      .map((a) => ({ label: a === 'longShots' ? 'Long shots' : capital(a), value: (p) => p.attributes?.[a] ?? null, better: 'high' })),
+    rows: [
+      ...CORE_ATTRIBUTES,
+      'finishing',
+      'crossing',
+      'longShots',
+      'positioning',
+      'diving',
+      'handling',
+      'reflexes',
+    ].map((a) => ({
+      label: a === 'longShots' ? 'Long shots' : capital(a),
+      value: (p) => p.attributes?.[a] ?? null,
+      better: 'high',
+    })),
   },
   market: {
     label: 'Market',
@@ -51,7 +73,12 @@ const TABS = {
       { label: 'Market value', value: (p) => p.marketValue, better: 'high', format: formatMoney },
       { label: 'Weekly salary (assumed)', value: (p) => p.contractSalary, format: formatMoney },
       { label: 'Contract until', value: (p) => p.contractEnd, format: formatDate },
-      { label: 'Goals + assists per €10K salary', value: (p) => (p.contractSalary ? Math.round(((p.goals + p.assists) / p.contractSalary) * 10000 * 10) / 10 : null), better: 'high' },
+      {
+        label: 'Goals + assists per €10K salary',
+        value: (p) =>
+          p.contractSalary ? Math.round(((p.goals + p.assists) / p.contractSalary) * 10000 * 10) / 10 : null,
+        better: 'high',
+      },
     ],
   },
 };
@@ -64,22 +91,32 @@ export default function Compare() {
   const [limitWarning, setLimitWarning] = useState(false);
 
   // Fetch the full profile of each selected player (attributes, value history, monthly form)
-  const { data: fetched, loading, error, reload } = useApi(
-    () => Promise.all(ids.map((id) => getPlayer(id))),
-    [ids.join(',')],
-  );
+  const {
+    data: fetched,
+    loading,
+    error,
+    reload,
+  } = useApi(() => Promise.all(ids.map((id) => getPlayer(id))), [ids.join(',')]);
 
   // Give each player a colour by their position in the selection
   const players = (fetched || []).map((p, i) => ({ ...p, color: SERIES_COLORS[i] }));
 
-  const setIds = (next) => setParams({ ...(next.length && { ids: next.join(',') }), ...(tab !== 'performance' && { tab }) });
+  const setIds = (next) =>
+    setParams({ ...(next.length && { ids: next.join(',') }), ...(tab !== 'performance' && { tab }) });
   const add = (player) => {
-    if (ids.length >= MAX_PLAYERS) { setLimitWarning(true); return; }
+    if (ids.length >= MAX_PLAYERS) {
+      setLimitWarning(true);
+      return;
+    }
     setLimitWarning(false);
     setIds([...ids, player.id]);
   };
-  const remove = (id) => { setLimitWarning(false); setIds(ids.filter((x) => x !== id)); };
-  const setTab = (key) => setParams({ ...(ids.length && { ids: ids.join(',') }), ...(key !== 'performance' && { tab: key }) });
+  const remove = (id) => {
+    setLimitWarning(false);
+    setIds(ids.filter((x) => x !== id));
+  };
+  const setTab = (key) =>
+    setParams({ ...(ids.length && { ids: ids.join(',') }), ...(key !== 'performance' && { tab: key }) });
 
   async function copyLink() {
     try {
@@ -90,10 +127,11 @@ export default function Compare() {
     }
   }
 
-  const exportCsv = () => downloadCsv(`comparison-${tab}.csv`, TABS[tab].rows, [
-    { label: 'Metric', value: (row) => row.label },
-    ...players.map((p) => ({ label: p.name, value: (row) => row.value(p) })),
-  ]);
+  const exportCsv = () =>
+    downloadCsv(`comparison-${tab}.csv`, TABS[tab].rows, [
+      { label: 'Metric', value: (row) => row.label },
+      ...players.map((p) => ({ label: p.name, value: (row) => row.value(p) })),
+    ]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -104,48 +142,87 @@ export default function Compare() {
         </div>
         {players.length >= 2 && (
           <div className="flex gap-2">
-            <Button variant="secondary" icon={Link2} onClick={copyLink}>Copy link</Button>
-            <Button variant="secondary" icon={Download} onClick={exportCsv}>Export CSV</Button>
+            <Button variant="secondary" icon={Link2} onClick={copyLink}>
+              Copy link
+            </Button>
+            <Button variant="secondary" icon={Download} onClick={exportCsv}>
+              Export CSV
+            </Button>
           </div>
         )}
       </div>
 
       {/* Selection: search to add, chips to remove */}
       <Card>
-        <PlayerPicker label="Add a player" placeholder={ids.length >= MAX_PLAYERS ? 'Maximum of 4 players reached' : 'Type a name...'}
-          excludeIds={ids} onSelect={add} disabled={ids.length >= MAX_PLAYERS} />
-        {limitWarning && <p className="mt-2 text-sm text-amber-700">You can compare up to 4 players. Remove one to add another.</p>}
+        <PlayerPicker
+          label="Add a player"
+          placeholder={ids.length >= MAX_PLAYERS ? 'Maximum of 4 players reached' : 'Type a name...'}
+          excludeIds={ids}
+          onSelect={add}
+          disabled={ids.length >= MAX_PLAYERS}
+        />
+        {limitWarning && (
+          <p className="mt-2 text-sm text-amber-700">You can compare up to 4 players. Remove one to add another.</p>
+        )}
         {players.length > 0 && (
           <ul className="mt-4 flex flex-wrap gap-2" aria-label="Selected players">
             {players.map((p) => (
-              <li key={p.id} className="inline-flex items-center gap-2 rounded-full border border-secondary-200 bg-white py-1 pl-3 pr-1 text-sm">
+              <li
+                key={p.id}
+                className="inline-flex items-center gap-2 rounded-full border border-secondary-200 bg-white py-1 pl-3 pr-1 text-sm"
+              >
                 <span className="size-2.5 rounded-full" style={{ background: p.color }} aria-hidden />
-                <Link to={`/players/${p.id}`} className="font-medium text-secondary-900 hover:text-primary-700">{p.name}</Link>
-                <button type="button" onClick={() => remove(p.id)} aria-label={`Remove ${p.name}`}
-                  className="rounded-full p-1 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-700"><X className="size-4" /></button>
+                <Link to={`/players/${p.id}`} className="font-medium text-secondary-900 hover:text-primary-700">
+                  {p.name}
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => remove(p.id)}
+                  aria-label={`Remove ${p.name}`}
+                  className="rounded-full p-1 text-secondary-400 hover:bg-secondary-100 hover:text-secondary-700"
+                >
+                  <X className="size-4" />
+                </button>
               </li>
             ))}
           </ul>
         )}
       </Card>
 
-      {loading && ids.length > 0 && <Card><ListSkeleton rows={4} label="Loading players..." /></Card>}
+      {loading && ids.length > 0 && (
+        <Card>
+          <ListSkeleton rows={4} label="Loading players..." />
+        </Card>
+      )}
       {error && <ErrorState message={error} onRetry={reload} />}
 
       {!loading && players.length < 2 && (
         <Card>
-          <EmptyState icon={GitCompare} title={players.length ? 'Add one more player' : 'No players selected yet'}
-            message="Search above, or tick players on the Players page and press Compare." />
+          <EmptyState
+            icon={GitCompare}
+            title={players.length ? 'Add one more player' : 'No players selected yet'}
+            message="Search above, or tick players on the Players page and press Compare."
+          />
         </Card>
       )}
 
       {!loading && players.length >= 2 && (
         <>
           {/* Tabs */}
-          <div role="tablist" aria-label="Metric category" className="flex gap-1 rounded-lg bg-secondary-100 p-1 sm:w-fit">
+          <div
+            role="tablist"
+            aria-label="Metric category"
+            className="flex gap-1 rounded-lg bg-secondary-100 p-1 sm:w-fit"
+          >
             {Object.entries(TABS).map(([key, t]) => (
-              <button key={key} type="button" role="tab" aria-selected={tab === key} onClick={() => setTab(key)}
-                className={`min-w-0 flex-1 rounded-md px-2 py-2 text-sm font-medium transition-colors duration-150 sm:flex-none sm:px-4 ${tab === key ? 'bg-white text-secondary-900 shadow-sm' : 'text-secondary-600 hover:text-secondary-900'}`}>
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={tab === key}
+                onClick={() => setTab(key)}
+                className={`min-w-0 flex-1 rounded-md px-2 py-2 text-sm font-medium transition-colors duration-150 sm:flex-none sm:px-4 ${tab === key ? 'bg-white text-secondary-900 shadow-sm' : 'text-secondary-600 hover:text-secondary-900'}`}
+              >
                 {t.label}
               </button>
             ))}
@@ -153,11 +230,22 @@ export default function Compare() {
 
           <div role="tabpanel" className="grid gap-6 lg:grid-cols-5">
             <Card title={`${TABS[tab].label}: side by side`} className="lg:col-span-3">
-              <CompareTable players={players} rows={TABS[tab].rows.filter((r) => players.some((p) => r.value(p) != null))} />
+              <CompareTable
+                players={players}
+                rows={TABS[tab].rows.filter((r) => players.some((p) => r.value(p) != null))}
+              />
               <p className="mt-3 text-xs text-secondary-500">The best value in each row is shown in bold green.</p>
             </Card>
-            <Card title={tab === 'performance' ? 'Goals + assists by month' : tab === 'attributes' ? 'Attribute profile' : 'Market value over time'}
-              className="lg:col-span-2">
+            <Card
+              title={
+                tab === 'performance'
+                  ? 'Goals + assists by month'
+                  : tab === 'attributes'
+                    ? 'Attribute profile'
+                    : 'Market value over time'
+              }
+              className="lg:col-span-2"
+            >
               <TabChart tab={tab} players={players} />
             </Card>
           </div>
@@ -170,25 +258,46 @@ export default function Compare() {
 function TabChart({ tab, players }) {
   if (tab === 'attributes') return <AttributeRadar players={players} />;
 
-  const series = players.map((p) => ({
-    id: p.id,
-    name: p.name,
-    color: p.color,
-    points: tab === 'performance'
-      ? p.monthlyForm.map((m) => ({ time: new Date(m.month).getTime(), value: m.goals + m.assists }))
-      : p.marketValues.map((v) => ({ time: new Date(v.date).getTime(), value: v.value })),
-  })).filter((s) => s.points.length > 0);
+  const series = players
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      color: p.color,
+      points:
+        tab === 'performance'
+          ? p.monthlyForm.map((m) => ({ time: new Date(m.month).getTime(), value: m.goals + m.assists }))
+          : p.marketValues.map((v) => ({ time: new Date(v.date).getTime(), value: v.value })),
+    }))
+    .filter((s) => s.points.length > 0);
 
   if (series.length === 0) {
-    return <EmptyState icon={ChartLine} title="No history for these players"
-      message={tab === 'performance' ? 'Monthly form is only available for 12 players in the source data.' : 'Valuation history is only available for 12 players in the source data.'} />;
+    return (
+      <EmptyState
+        icon={ChartLine}
+        title="No history for these players"
+        message={
+          tab === 'performance'
+            ? 'Monthly form is only available for 12 players in the source data.'
+            : 'Valuation history is only available for 12 players in the source data.'
+        }
+      />
+    );
   }
   return (
     <>
-      <TimeLines series={series} valueFormat={tab === 'market' ? formatMoney : (v) => v} valueLabel={tab === 'performance' ? 'G+A' : null} />
+      <TimeLines
+        series={series}
+        valueFormat={tab === 'market' ? formatMoney : (v) => v}
+        valueLabel={tab === 'performance' ? 'G+A' : null}
+      />
       {series.length < players.length && (
         <p className="mt-2 text-xs text-secondary-500">
-          Not shown (no history in the data): {players.filter((p) => !series.some((s) => s.id === p.id)).map((p) => p.name).join(', ')}.
+          Not shown (no history in the data):{' '}
+          {players
+            .filter((p) => !series.some((s) => s.id === p.id))
+            .map((p) => p.name)
+            .join(', ')}
+          .
         </p>
       )}
     </>

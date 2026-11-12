@@ -4,7 +4,10 @@ const Joi = require('joi');
 const registerSchema = Joi.object({
   name: Joi.string().trim().min(2).max(80).required(),
   email: Joi.string().trim().lowercase().email().required(),
-  password: Joi.string().min(8).max(100).required()
+  password: Joi.string()
+    .min(8)
+    .max(100)
+    .required()
     .messages({ 'string.min': 'Password must be at least 8 characters.' }),
 });
 

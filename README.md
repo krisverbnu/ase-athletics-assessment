@@ -17,17 +17,33 @@ Built by **Kristina Verbova** for the ASE Athletics technical assessment, Novemb
 
 ## Contents
 
-- [Features](#features)
+- [Features](#features) · [Feature checklist](#feature-checklist)
 - [Tech stack](#tech-stack)
 - [Run it locally](#run-it-locally)
 - [Tests and CI](#tests-and-ci)
 - [Project structure](#project-structure)
+- [Database](#database)
 - [API](#api)
 - [Key decisions](#key-decisions)
 - [Data handling](#data-handling)
 - [Security](#security)
+- [Performance](#performance)
+- [Deployment](#deployment)
 - [What I'd do next](#what-id-do-next)
 - [How this was built](#how-this-was-built)
+
+## Documentation
+
+| Document | What's in it |
+|---|---|
+| [Architecture](docs/architecture.md) | How the pieces fit together, the request lifecycle, where state lives, diagrams |
+| [Decisions and rationale](docs/decisions.md) | Why each technology and design choice, alternatives considered, what was deliberately left out |
+| [Database schema](docs/database-schema.md) | Diagram, every table, relationships, constraints, indexes, seeding |
+| [API documentation](docs/api-documentation.md) | Every endpoint with request and response examples, status codes, rate limits |
+| [Data quality](docs/data-quality.md) | Every issue in ASE's data and how it's handled |
+| [Deployment guide](docs/deployment-guide.md) | Neon, Render, Vercel and CI setup, secrets, troubleshooting |
+| [Challenges](docs/challenges.md) | Problems hit during the build, their causes, fixes and lessons |
+| [Swagger UI](https://ase-athletics-assessment.onrender.com/api/docs) | Try every endpoint in the browser |
 
 ## Features
 
@@ -71,6 +87,36 @@ Built by **Kristina Verbova** for the ASE Athletics technical assessment, Novemb
 | Player profile | Phone |
 |---|---|
 | ![Profile](docs/screenshots/player-profile.png) | ![Phone](docs/screenshots/mobile-players.png) |
+
+## Feature checklist
+
+| Brief requirement | Status | Where |
+|---|---|---|
+| User authentication and session management | ✅ | Register, login, logout, JWT, protected routes, auto-logout on expiry, rate limits |
+| Complete player CRUD | ✅ | Players → Add, profile → Edit / Delete |
+| Interactive analytics dashboard | ✅ | KPIs, 5 chart types, ranked lists, dashboard-wide filters |
+| Advanced search and filtering | ✅ | Text search with highlights, multi-select filters, range sliders, sorting, pagination |
+| Player comparison tool | ✅ | 2 to 4 players, three tabs, radar and trend charts |
+| Scouting reports system | ✅ | Structured reports, 10 ratings, recommendation, author-only editing |
+| Responsive design | ✅ | 320px phones to desktop |
+| Data export | ✅ | CSV for players, comparisons and every dashboard chart; reports print to PDF |
+| API documentation | ✅ | Swagger UI + [docs/api-documentation.md](docs/api-documentation.md) |
+
+**Bonus features**
+
+| Bonus | Status |
+|---|---|
+| Search suggestions / autocomplete | ✅ Player picker in Compare and reports |
+| Filter state persistence during session | ✅ URL + session storage |
+| Shareable comparison URLs | ✅ Copy link |
+| Export chart data | ✅ CSV on every chart |
+| Export to PDF | ✅ Scouting reports (print / save as PDF) |
+| Unit, API and component tests | ✅ 43 API + 12 frontend, in CI |
+| Production deployment, secrets management, hosted DB | ✅ Vercel, Render, Neon |
+| CDN for static assets | ✅ Vercel's edge network |
+| Export comparison as image / PDF | ➖ CSV and shareable link instead |
+| Image upload | ➖ Initials avatars; see [what was left out](docs/decisions.md#deliberately-not-done-and-why) |
+| Real-time updates (WebSockets) | ➖ Not needed for this data; see the same section |
 
 ## Tech stack
 
@@ -170,6 +216,28 @@ ase-athletics-assessment/
         └── tests/
 ```
 
+## Database
+
+PostgreSQL on Neon, managed with Prisma: 6 tables with foreign keys, enums, unique constraints and cascading deletes. Full detail in [docs/database-schema.md](docs/database-schema.md).
+
+```mermaid
+erDiagram
+    users ||--o{ scout_reports : writes
+    players ||--o{ scout_reports : "is the subject of"
+    players ||--o| player_attributes : has
+    players ||--o{ market_value_history : has
+    players ||--o{ player_monthly_form : has
+```
+
+| Table | Holds |
+|---|---|
+| `users` | Login accounts; every user is a scout |
+| `players` | Profile, season stats, contract and market value (missing values stay empty) |
+| `player_attributes` | Ratings out of 100, one row per player |
+| `market_value_history` | Valuations over time |
+| `player_monthly_form` | Goals, assists and rating per month |
+| `scout_reports` | Match context, 10 ratings, strengths, weaknesses, verdict; linked to a player and its author |
+
 ## API
 
 Full interactive docs: [`/api/docs`](https://ase-athletics-assessment.onrender.com/api/docs). Everything except auth and health needs an `Authorization: Bearer <token>` header.
@@ -206,6 +274,8 @@ Errors always look the same: `{ "error": { "message": "...", "details": [{ "fiel
 | **Colours from ASE's guidelines, adjusted for accessibility** | Primary buttons use a darker blue from the same palette to pass WCAG AA contrast. Chart colours were checked for colour-blind separation. |
 | **Free hosting split three ways** | Vercel, Render and Neon are each strong at one thing and free, with deploys on every push. |
 
+The full reasoning for every technology and design choice, with alternatives considered and what was left out on purpose, is in [docs/decisions.md](docs/decisions.md).
+
 ## Data handling
 
 ASE's data has real gaps, and handling them is part of the brief. The rule throughout: **never invent a number.** Missing values are stored as empty, shown as "Not available" with an explanation, sorted last, and can be filled in by a scout.
@@ -235,6 +305,23 @@ Full details, with evidence for each decision: [`docs/data-quality.md`](docs/dat
 
 **Trade-off: token in localStorage.** The login token is stored in `localStorage` and sent as a header. That's simple and works across the frontend (Vercel) and API (Render), which are on different domains. The risk is that a cross-site scripting bug could read it. React escapes all rendered content and the app never injects raw HTML, which keeps that risk low. In production I'd serve both from the same domain and move the token to an `HttpOnly`, `Secure`, `SameSite` cookie, which JavaScript can't read at all. I didn't do that here because cross-domain cookies are increasingly blocked by browsers, and a broken login would be worse than a documented trade-off.
 
+## Performance
+
+- Indexes on every searched and filtered column; paginated lists (25 per page)
+- One request for the whole dashboard, calculated on the server
+- Autocomplete returns only the 5 fields it needs; search waits for a typing pause
+- Pooled database connections through Neon and a single shared Prisma client
+- Pages load on demand: first download cut from 874 kB to 340 kB
+- Static frontend served from Vercel's CDN
+
+At larger scale I'd move the dashboard aggregations into SQL and cache them. More in [docs/decisions.md](docs/decisions.md#performance).
+
+## Deployment
+
+Push to `main` and everything deploys itself: GitHub Actions runs the tests, Vercel rebuilds the frontend, Render rebuilds the API (when `backend/` changed) and applies any new database migrations. Secrets live only in each platform's settings. A small scheduled workflow keeps the free API awake during review.
+
+Step-by-step setup, environment variables and troubleshooting: [docs/deployment-guide.md](docs/deployment-guide.md).
+
 ## What I'd do next
 
 - Same-domain deploy with `HttpOnly` cookie sessions
@@ -246,4 +333,4 @@ Full details, with evidence for each decision: [`docs/data-quality.md`](docs/dat
 
 ## How this was built
 
-I built this with Claude Code as a coding assistant: planning, writing code, and debugging. I made the decisions, tested each feature, and can walk through any file and explain why it works the way it does. The problems I hit along the way and how they were solved are logged in a challenges document, available on request.
+I built this with Claude Code as a coding assistant: planning, writing code, and debugging. I made the decisions, tested each feature, and can walk through any file and explain why it works the way it does. The problems I hit along the way, what caused them and how they were solved are logged in [docs/challenges.md](docs/challenges.md).

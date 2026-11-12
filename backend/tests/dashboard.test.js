@@ -4,9 +4,20 @@ jest.mock('../src/utils/prisma', () => ({})); // never load the real database cl
 const { computeStats } = require('../src/services/dashboardService');
 
 const player = (overrides) => ({
-  id: 1, name: 'Test', team: 'Team', position: 'Forward', age: 25,
-  goals: 0, assists: 0, minutesPlayed: 0, contractSalary: 1000, contractEnd: '2027-06-30',
-  marketValue: null, attributes: { pace: 70 }, marketValues: [], _count: { monthlyForm: 0 },
+  id: 1,
+  name: 'Test',
+  team: 'Team',
+  position: 'Forward',
+  age: 25,
+  goals: 0,
+  assists: 0,
+  minutesPlayed: 0,
+  contractSalary: 1000,
+  contractEnd: '2027-06-30',
+  marketValue: null,
+  attributes: { pace: 70 },
+  marketValues: [],
+  _count: { monthlyForm: 0 },
   ...overrides,
 });
 

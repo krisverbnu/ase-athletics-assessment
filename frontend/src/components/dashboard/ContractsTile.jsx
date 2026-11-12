@@ -15,12 +15,21 @@ export default function ContractsTile({ status }) {
         <CalendarClock className="size-5 text-secondary-400" aria-hidden />
       </div>
       <table className="mt-2 w-full text-sm">
-        <caption className="sr-only">Expired contracts and contracts ending within 12 months, from the data date and from today</caption>
+        <caption className="sr-only">
+          Expired contracts and contracts ending within 12 months, from the data date and from today
+        </caption>
         <thead>
           <tr className="align-bottom text-xs text-secondary-500">
-            <th scope="col" className="pb-1 text-left font-normal">Counting from</th>
-            <th scope="col" className="pb-1 pl-3 text-right font-normal">Expired</th>
-            <th scope="col" className="pb-1 pl-3 text-right font-normal"><span aria-hidden>Next 12&nbsp;mo</span><span className="sr-only">Ending within the next 12 months</span></th>
+            <th scope="col" className="pb-1 text-left font-normal">
+              Counting from
+            </th>
+            <th scope="col" className="pb-1 pl-3 text-right font-normal">
+              Expired
+            </th>
+            <th scope="col" className="pb-1 pl-3 text-right font-normal">
+              <span aria-hidden>Next 12&nbsp;mo</span>
+              <span className="sr-only">Ending within the next 12 months</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -31,7 +40,9 @@ export default function ContractsTile({ status }) {
                 <span className="block text-xs text-secondary-500">{formatDate(r.date)}</span>
               </th>
               <td className="py-1.5 text-right text-lg font-bold tabular-nums text-secondary-900">{r.expired}</td>
-              <td className="py-1.5 pl-3 text-right text-lg font-bold tabular-nums text-secondary-900">{r.endingWithin12Months}</td>
+              <td className="py-1.5 pl-3 text-right text-lg font-bold tabular-nums text-secondary-900">
+                {r.endingWithin12Months}
+              </td>
             </tr>
           ))}
         </tbody>

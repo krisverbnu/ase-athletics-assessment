@@ -36,7 +36,10 @@ test('lists every missing required field at once', async () => {
 
 test('drops fields the API does not know about', async () => {
   prisma.player.create.mockImplementation(({ data }) => Promise.resolve({ id: 92, ...data }));
-  await request(app).post('/api/players').set(auth).send({ ...newPlayer, id: 1, isAdmin: true });
+  await request(app)
+    .post('/api/players')
+    .set(auth)
+    .send({ ...newPlayer, id: 1, isAdmin: true });
   const saved = prisma.player.create.mock.calls[0][0].data;
   expect(saved).not.toHaveProperty('isAdmin');
   expect(saved).not.toHaveProperty('id');

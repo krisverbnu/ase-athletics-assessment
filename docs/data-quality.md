@@ -29,7 +29,7 @@ The same numbers are calculated live by the API (`GET /api/dashboard/stats` → 
 | 6 | A retired player in the detailed file | Batalla marked as retired | Not imported | The app scouts active players; a retired profile would skew ages and values |
 | 7 | Scout report linked to a player id that doesn't exist | Report #1 points to a missing id | Re-linked by name to Marcus Thompson | Keeps the report instead of dropping real scouting work |
 | 8 | Monthly form labels without a year | e.g. "August", "September" | Year inferred: starts in 2024 and increments when months wrap (Dec → Jan) | Matches the 2024-25 season the data covers |
-| 9 | Scout reports need a clear verdict | Reports carry a 1–10 overall rating | One rule: **9–10 SIGN, 6–8 MONITOR, 1–5 PASS**, applied by the API | Same rating always gives the same verdict |
+| 9 | ASE's reports have no SIGN / MONITOR / PASS verdict | The file's `recommendation` field is a sentence ("Exceptional young talent...") | On import, that sentence becomes the report's **summary**, and the verdict comes from the overall rating: **9–10 SIGN, 6–8 MONITOR, 1–5 PASS**. New reports: the scout chooses the verdict | Keeps the scout's words and gives every report a verdict the app can filter and colour. One rule, applied once, documented and tested |
 | 10 | Design system button colour fails contrast | `#0ea5e9` on white text is below WCAG AA | Buttons use the darker `#0369a1` from the same palette | Accessibility without leaving the brand |
 
 ## What a scout sees

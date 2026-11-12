@@ -1,6 +1,17 @@
 // Two small charts for the player profile: market value over time and goals/assists per month.
 // Colours from the guidelines' chart palette.
-import { Bar, BarChart, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import {
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from 'recharts';
 import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { formatMoney, SERIES_COLORS } from '../../utils/format';
 
@@ -14,11 +25,39 @@ export function ValueHistoryChart({ history }) {
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
           <CartesianGrid stroke={GRID} vertical={false} />
-          <XAxis dataKey="time" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={monthLabel}
-            tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
+          <XAxis
+            dataKey="time"
+            type="number"
+            scale="time"
+            domain={['dataMin', 'dataMax']}
+            tickFormatter={monthLabel}
+            tick={AXIS}
+            tickLine={false}
+            axisLine={AXIS_LINE}
+          />
           <YAxis tickFormatter={formatMoney} tick={AXIS} tickLine={false} axisLine={false} width={56} />
-          <Tooltip {...TOOLTIP} cursor={LINE_CURSOR} formatter={(v) => [formatMoney(v), 'Market value']} labelFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })} />
-          <Line type="monotone" dataKey="value" stroke={SERIES_COLORS[0]} strokeWidth={2} dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 5 }} isAnimationActive={false} />
+          <Tooltip
+            {...TOOLTIP}
+            cursor={LINE_CURSOR}
+            formatter={(v) => [formatMoney(v), 'Market value']}
+            labelFormatter={(t) =>
+              new Date(t).toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                timeZone: 'UTC',
+              })
+            }
+          />
+          <Line
+            type="monotone"
+            dataKey="value"
+            stroke={SERIES_COLORS[0]}
+            strokeWidth={2}
+            dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+            activeDot={{ r: 5 }}
+            isAnimationActive={false}
+          />
         </LineChart>
       </ResponsiveContainer>
     </div>

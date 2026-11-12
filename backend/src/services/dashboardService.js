@@ -59,13 +59,21 @@ function computeStats(players, asOfDate, todayDate = new Date().toISOString().sl
   // Goals + assists per 90 minutes (output adjusted for playing time)
   const per90 = players
     .filter((p) => p.minutesPlayed >= MIN_MINUTES_FOR_PER_90)
-    .map((p) => ({ ...pick(p), minutesPlayed: p.minutesPlayed, goalContributionsPer90: round(((p.goals + p.assists) / p.minutesPlayed) * 90, 2) }))
+    .map((p) => ({
+      ...pick(p),
+      minutesPlayed: p.minutesPlayed,
+      goalContributionsPer90: round(((p.goals + p.assists) / p.minutesPlayed) * 90, 2),
+    }))
     .sort((a, b) => b.goalContributionsPer90 - a.goalContributionsPer90);
 
   // Goal contributions per €10k of weekly salary (salary unit assumed weekly EUR)
   const valueForMoney = players
     .filter((p) => p.contractSalary > 0 && p.goals + p.assists > 0)
-    .map((p) => ({ ...pick(p), weeklySalary: p.contractSalary, contributionsPer10k: round(((p.goals + p.assists) / p.contractSalary) * 10000, 2) }))
+    .map((p) => ({
+      ...pick(p),
+      weeklySalary: p.contractSalary,
+      contributionsPer10k: round(((p.goals + p.assists) / p.contractSalary) * 10000, 2),
+    }))
     .sort((a, b) => b.contributionsPer10k - a.contributionsPer10k);
 
   const teamCounts = players.reduce((acc, p) => ({ ...acc, [p.team]: (acc[p.team] || 0) + 1 }), {});
@@ -111,7 +119,9 @@ function computeStats(players, asOfDate, todayDate = new Date().toISOString().sl
       const group = players.filter((p) => p.position === position && p.attributes);
       return {
         position,
-        ...Object.fromEntries(CORE_ATTRIBUTES.map((attr) => [attr, round(average(group.map((p) => p.attributes[attr])))])),
+        ...Object.fromEntries(
+          CORE_ATTRIBUTES.map((attr) => [attr, round(average(group.map((p) => p.attributes[attr])))]),
+        ),
       };
     }),
     topPer90: per90.slice(0, 10),

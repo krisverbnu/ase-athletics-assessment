@@ -12,13 +12,43 @@ import { createPlayer, getPlayer, updatePlayer } from '../services/playerService
 import { POSITIONS, toInputDate } from '../utils/format';
 
 const ATTRIBUTES = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
-const NUMBER_FIELDS = ['age', 'height', 'weight', 'jerseyNumber', 'appearances', 'goals', 'assists', 'minutesPlayed',
-  'yellowCards', 'redCards', 'passAccuracy', 'contractSalary', 'marketValue'];
+const NUMBER_FIELDS = [
+  'age',
+  'height',
+  'weight',
+  'jerseyNumber',
+  'appearances',
+  'goals',
+  'assists',
+  'minutesPlayed',
+  'yellowCards',
+  'redCards',
+  'passAccuracy',
+  'contractSalary',
+  'marketValue',
+];
 
 const EMPTY = {
-  name: '', position: '', age: '', team: '', league: '', nationality: '', height: '', weight: '',
-  preferredFoot: '', jerseyNumber: '', appearances: '0', goals: '0', assists: '0', minutesPlayed: '0',
-  yellowCards: '0', redCards: '0', passAccuracy: '', contractSalary: '', contractEnd: '', marketValue: '',
+  name: '',
+  position: '',
+  age: '',
+  team: '',
+  league: '',
+  nationality: '',
+  height: '',
+  weight: '',
+  preferredFoot: '',
+  jerseyNumber: '',
+  appearances: '0',
+  goals: '0',
+  assists: '0',
+  minutesPlayed: '0',
+  yellowCards: '0',
+  redCards: '0',
+  passAccuracy: '',
+  contractSalary: '',
+  contractEnd: '',
+  marketValue: '',
   attributes: Object.fromEntries(ATTRIBUTES.map((a) => [a, '50'])),
 };
 
@@ -56,7 +86,8 @@ function validate(f) {
   if (!f.age || f.age < 15 || f.age > 50) e.age = 'Age must be between 15 and 50.';
   if (!f.team.trim()) e.team = 'Team is required.';
   if (f.nationality.trim().length < 2) e.nationality = 'Nationality is required.';
-  if (f.passAccuracy !== '' && (f.passAccuracy < 0 || f.passAccuracy > 100)) e.passAccuracy = 'Must be between 0 and 100.';
+  if (f.passAccuracy !== '' && (f.passAccuracy < 0 || f.passAccuracy > 100))
+    e.passAccuracy = 'Must be between 0 and 100.';
   return e;
 }
 
@@ -89,7 +120,10 @@ export default function PlayerForm() {
   useEffect(() => {
     if (!isEdit) return;
     getPlayer(id)
-      .then((p) => { setForm(toForm(p)); setLoadState({ loading: false, error: null }); })
+      .then((p) => {
+        setForm(toForm(p));
+        setLoadState({ loading: false, error: null });
+      })
       .catch((err) => setLoadState({ loading: false, error: getErrorMessage(err) }));
   }, [id, isEdit]);
 
@@ -132,8 +166,14 @@ export default function PlayerForm() {
       <Link to={backTo} className="inline-flex items-center gap-1 text-sm text-secondary-600 hover:text-primary-700">
         <ArrowLeft className="size-4" aria-hidden /> Back
       </Link>
-      <h1 className="text-2xl font-bold text-secondary-900">{isEdit ? `Edit ${form.name || 'player'}` : 'Add a player'}</h1>
-      {formError && <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">{formError}</p>}
+      <h1 className="text-2xl font-bold text-secondary-900">
+        {isEdit ? `Edit ${form.name || 'player'}` : 'Add a player'}
+      </h1>
+      {formError && (
+        <p role="alert" className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+          {formError}
+        </p>
+      )}
 
       <Card title="Profile">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -145,7 +185,12 @@ export default function PlayerForm() {
           <TextField label="Nationality" required {...field('nationality')} />
           <TextField label="Height (cm)" type="number" {...field('height')} />
           <TextField label="Weight (kg)" type="number" {...field('weight')} />
-          <SelectField label="Preferred foot" placeholder="Not specified" options={['Left', 'Right', 'Both']} {...field('preferredFoot')} />
+          <SelectField
+            label="Preferred foot"
+            placeholder="Not specified"
+            options={['Left', 'Right', 'Both']}
+            {...field('preferredFoot')}
+          />
           <TextField label="Shirt number" type="number" min="1" max="99" {...field('jerseyNumber')} />
         </div>
       </Card>
@@ -164,10 +209,21 @@ export default function PlayerForm() {
 
       <Card title="Contract & market">
         <div className="grid gap-4 sm:grid-cols-3">
-          <TextField label="Weekly salary (€)" type="number" min="0" {...field('contractSalary')} hint="Weekly, in euros." />
+          <TextField
+            label="Weekly salary (€)"
+            type="number"
+            min="0"
+            {...field('contractSalary')}
+            hint="Weekly, in euros."
+          />
           <TextField label="Contract end" type="date" {...field('contractEnd')} />
-          <TextField label="Market value (€)" type="number" min="0" {...field('marketValue')}
-            hint="Missing from the source data for most players. Add it if you know it; otherwise leave it empty (never 0)." />
+          <TextField
+            label="Market value (€)"
+            type="number"
+            min="0"
+            {...field('marketValue')}
+            hint="Missing from the source data for most players. Add it if you know it; otherwise leave it empty (never 0)."
+          />
         </div>
       </Card>
 
@@ -176,20 +232,34 @@ export default function PlayerForm() {
           {ATTRIBUTES.map((a) => (
             <div key={a}>
               <div className="flex justify-between text-sm">
-                <label htmlFor={`attr-${a}`} className="font-medium capitalize text-secondary-700">{a}</label>
+                <label htmlFor={`attr-${a}`} className="font-medium capitalize text-secondary-700">
+                  {a}
+                </label>
                 <span className="font-semibold tabular-nums">{form.attributes[a]}</span>
               </div>
-              <input id={`attr-${a}`} type="range" min="1" max="100" value={form.attributes[a]}
+              <input
+                id={`attr-${a}`}
+                type="range"
+                min="1"
+                max="100"
+                value={form.attributes[a]}
                 onChange={(e) => setForm((f) => ({ ...f, attributes: { ...f.attributes, [a]: e.target.value } }))}
-                className="mt-2 h-2 w-full cursor-pointer accent-primary-700" />
+                className="mt-2 h-2 w-full cursor-pointer accent-primary-700"
+              />
             </div>
           ))}
         </div>
       </Card>
 
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <Link to={backTo}><Button variant="secondary" className="w-full">Cancel</Button></Link>
-        <Button type="submit" loading={saving}>{isEdit ? 'Save changes' : 'Add player'}</Button>
+        <Link to={backTo}>
+          <Button variant="secondary" className="w-full">
+            Cancel
+          </Button>
+        </Link>
+        <Button type="submit" loading={saving}>
+          {isEdit ? 'Save changes' : 'Add player'}
+        </Button>
       </div>
     </form>
   );

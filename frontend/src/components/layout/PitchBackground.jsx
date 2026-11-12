@@ -2,8 +2,12 @@
 // Drawn to real proportions (105 x 68 m, 1 unit = 10 cm). Decorative only (aria-hidden).
 export default function PitchBackground() {
   return (
-    <svg viewBox="-40 -40 1130 760" preserveAspectRatio="xMidYMid slice" aria-hidden
-      className="pointer-events-none absolute inset-0 size-full">
+    <svg
+      viewBox="-40 -40 1130 760"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden
+      className="pointer-events-none absolute inset-0 size-full"
+    >
       <g fill="none" stroke="white" strokeOpacity="0.07" strokeWidth="3" vectorEffect="non-scaling-stroke">
         <rect x="0" y="0" width="1050" height="680" />
         <line x1="525" y1="0" x2="525" y2="680" />

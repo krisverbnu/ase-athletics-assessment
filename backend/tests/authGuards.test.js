@@ -31,13 +31,18 @@ describe('login rate limit', () => {
 });
 
 describe('sign-up', () => {
-  const signUp = (email, ip) => request(app).post('/api/auth/register').set('X-Forwarded-For', ip)
-    .send({ name: 'Test Scout', email, password: 'password123' });
+  const signUp = (email, ip) =>
+    request(app)
+      .post('/api/auth/register')
+      .set('X-Forwarded-For', ip)
+      .send({ name: 'Test Scout', email, password: 'password123' });
 
   beforeEach(() => {
     prisma.user.create.mockImplementation(({ data }) => Promise.resolve({ id: 5, ...data }));
   });
-  afterEach(() => { delete process.env.ALLOWED_EMAIL_DOMAINS; });
+  afterEach(() => {
+    delete process.env.ALLOWED_EMAIL_DOMAINS;
+  });
 
   test('anyone can register when no domain list is set (the assessment setup)', async () => {
     expect((await signUp('reviewer@gmail.com', '2.2.2.1')).status).toBe(201);

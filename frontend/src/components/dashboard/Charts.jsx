@@ -3,13 +3,28 @@
 //   one y-axis per chart, light grid, axis text slate-500, thin marks with rounded ends,
 //   a legend whenever there's more than one series, and a tooltip on hover.
 import {
-  Bar, BarChart, CartesianGrid, Cell, Legend, Line, LineChart, Pie, PieChart, PolarAngleAxis,
-  PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  PolarAngleAxis,
+  PolarGrid,
+  PolarRadiusAxis,
+  Radar,
+  RadarChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from 'recharts';
 import { buildTrendRows } from '../../utils/chartData';
 import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { formatMoney, POSITION_COLORS, SERIES_COLORS } from '../../utils/format';
-
 
 // 1. Goals and assists by position: grouped bars, one axis (both are counts)
 export function GoalsByPositionChart({ data }) {
@@ -39,9 +54,19 @@ export function AgeGroupsChart({ data }) {
       <div className="relative h-56 w-56 shrink-0">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
-            <Pie data={data} dataKey="players" nameKey="label" innerRadius="62%" outerRadius="100%"
-              stroke="#ffffff" strokeWidth={2} isAnimationActive={false}>
-              {data.map((d, i) => <Cell key={d.label} fill={AGE_SHADES[i]} />)}
+            <Pie
+              data={data}
+              dataKey="players"
+              nameKey="label"
+              innerRadius="62%"
+              outerRadius="100%"
+              stroke="#ffffff"
+              strokeWidth={2}
+              isAnimationActive={false}
+            >
+              {data.map((d, i) => (
+                <Cell key={d.label} fill={AGE_SHADES[i]} />
+              ))}
             </Pie>
             <Tooltip {...TOOLTIP} formatter={(v) => [`${v} players`, 'Players']} />
           </PieChart>
@@ -61,7 +86,8 @@ export function AgeGroupsChart({ data }) {
               {d.label}
             </span>
             <span className="tabular-nums text-secondary-900">
-              {d.players} <span className="text-secondary-500">({total ? Math.round((d.players / total) * 100) : 0}%)</span>
+              {d.players}{' '}
+              <span className="text-secondary-500">({total ? Math.round((d.players / total) * 100) : 0}%)</span>
             </span>
           </li>
         ))}
@@ -81,15 +107,43 @@ export function ValueTrendsChart({ trends }) {
     <ResponsiveContainer width="100%" height={300}>
       <LineChart data={rows} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
         <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="time" type="number" scale="time" domain={['dataMin', 'dataMax']} tickFormatter={monthLabel}
-          tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
+        <XAxis
+          dataKey="time"
+          type="number"
+          scale="time"
+          domain={['dataMin', 'dataMax']}
+          tickFormatter={monthLabel}
+          tick={AXIS}
+          tickLine={false}
+          axisLine={AXIS_LINE}
+        />
         <YAxis tickFormatter={formatMoney} tick={AXIS} tickLine={false} axisLine={false} width={56} />
-        <Tooltip {...TOOLTIP} cursor={LINE_CURSOR} formatter={(v, name) => [formatMoney(v), name]}
-          labelFormatter={(t) => new Date(t).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' })} />
+        <Tooltip
+          {...TOOLTIP}
+          cursor={LINE_CURSOR}
+          formatter={(v, name) => [formatMoney(v), name]}
+          labelFormatter={(t) =>
+            new Date(t).toLocaleDateString('en-GB', {
+              day: 'numeric',
+              month: 'short',
+              year: 'numeric',
+              timeZone: 'UTC',
+            })
+          }
+        />
         <Legend {...LEGEND} />
         {trends.map((player, i) => (
-          <Line isAnimationActive={false} key={player.id} type="monotone" dataKey={player.name} stroke={SERIES_COLORS[i]} strokeWidth={2}
-            dot={{ r: 4, strokeWidth: 2, fill: '#fff' }} activeDot={{ r: 5 }} connectNulls />
+          <Line
+            isAnimationActive={false}
+            key={player.id}
+            type="monotone"
+            dataKey={player.name}
+            stroke={SERIES_COLORS[i]}
+            strokeWidth={2}
+            dot={{ r: 4, strokeWidth: 2, fill: '#fff' }}
+            activeDot={{ r: 5 }}
+            connectNulls
+          />
         ))}
       </LineChart>
     </ResponsiveContainer>
@@ -115,8 +169,17 @@ export function AttributesRadar({ data }) {
         <Tooltip {...TOOLTIP} />
         <Legend {...LEGEND} />
         {positions.map((position) => (
-          <Radar isAnimationActive={false} key={position} name={position} dataKey={position} stroke={POSITION_COLORS[position]}
-            fill={POSITION_COLORS[position]} fillOpacity={0.08} strokeWidth={2} dot={{ r: 3 }} />
+          <Radar
+            isAnimationActive={false}
+            key={position}
+            name={position}
+            dataKey={position}
+            stroke={POSITION_COLORS[position]}
+            fill={POSITION_COLORS[position]}
+            fillOpacity={0.08}
+            strokeWidth={2}
+            dot={{ r: 3 }}
+          />
         ))}
       </RadarChart>
     </ResponsiveContainer>
@@ -131,7 +194,14 @@ export function TeamsChart({ data }) {
       <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 24, left: 8, bottom: 0 }} barCategoryGap={6}>
         <CartesianGrid stroke={GRID} horizontal={false} />
         <XAxis type="number" allowDecimals={false} tick={AXIS} tickLine={false} axisLine={false} />
-        <YAxis type="category" dataKey="team" width={140} tick={{ ...AXIS, fill: '#475569' }} tickLine={false} axisLine={false} />
+        <YAxis
+          type="category"
+          dataKey="team"
+          width={140}
+          tick={{ ...AXIS, fill: '#475569' }}
+          tickLine={false}
+          axisLine={false}
+        />
         <Tooltip {...TOOLTIP} formatter={(v) => [v, 'Players']} />
         <Bar isAnimationActive={false} dataKey="players" fill={SERIES_COLORS[0]} radius={[0, 4, 4, 0]} />
       </BarChart>

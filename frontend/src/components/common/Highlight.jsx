@@ -10,8 +10,12 @@ export default function Highlight({ text, query }) {
   const parts = String(text).split(new RegExp(`(${safe})`, 'gi'));
 
   return parts.map((part, i) =>
-    part.toLowerCase() === query.toLowerCase()
-      ? <mark key={i} className="rounded bg-amber-200 px-0.5 text-secondary-900">{part}</mark>
-      : part,
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={i} className="rounded bg-amber-200 px-0.5 text-secondary-900">
+        {part}
+      </mark>
+    ) : (
+      part
+    ),
   );
 }

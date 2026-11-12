@@ -15,7 +15,9 @@ export default function RankedList({ items, value, empty = 'No players match the
               <p className="truncate text-xs text-secondary-500">{item.team}</p>
             </div>
             <PositionBadge position={item.position} />
-            <span className="min-w-12 shrink-0 whitespace-nowrap text-right text-sm font-semibold tabular-nums text-secondary-900">{value(item)}</span>
+            <span className="min-w-12 shrink-0 whitespace-nowrap text-right text-sm font-semibold tabular-nums text-secondary-900">
+              {value(item)}
+            </span>
           </Link>
         </li>
       ))}

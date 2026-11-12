@@ -27,7 +27,12 @@ const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
   skipSuccessfulRequests: true,
-  keyGenerator: (req) => `login:${String(req.body?.email || '').trim().toLowerCase() || ipKeyGenerator(visitorIp(req))}`,
+  keyGenerator: (req) =>
+    `login:${
+      String(req.body?.email || '')
+        .trim()
+        .toLowerCase() || ipKeyGenerator(visitorIp(req))
+    }`,
   handler: tooMany('Too many failed attempts for this account. Please wait 15 minutes and try again.'),
 });
 

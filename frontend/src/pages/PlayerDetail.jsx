@@ -30,7 +30,9 @@ function InfoRow({ label, value, note }) {
     <div className="flex justify-between gap-4 py-2 text-sm">
       <dt className="text-secondary-500">{label}</dt>
       <dd className="text-right">
-        <span className={value == null ? 'text-secondary-400' : 'font-medium text-secondary-900'}>{value ?? 'Not available'}</span>
+        <span className={value == null ? 'text-secondary-400' : 'font-medium text-secondary-900'}>
+          {value ?? 'Not available'}
+        </span>
         {note && <span className="block text-xs font-normal text-secondary-500">{note}</span>}
       </dd>
     </div>
@@ -40,12 +42,18 @@ function InfoRow({ label, value, note }) {
 // Where the market value came from: the source data, a user, or nowhere yet
 function marketValueNote(p) {
   if (p.marketValue == null) {
-    return <>Not in the source data · <Link to={`/players/${p.id}/edit`} className="text-primary-700 underline">add it</Link></>;
+    return (
+      <>
+        Not in the source data ·{' '}
+        <Link to={`/players/${p.id}/edit`} className="text-primary-700 underline">
+          add it
+        </Link>
+      </>
+    );
   }
   const latest = p.marketValues.at(-1);
   return latest ? `ASE detailed data · valued ${formatDate(latest.date)}` : 'Entered in this app';
 }
-
 
 export default function PlayerDetail() {
   const { id } = useParams();
@@ -91,8 +99,14 @@ export default function PlayerDetail() {
               <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-secondary-600">
                 <PositionBadge position={p.position} />
                 {p.detailedPosition && p.detailedPosition !== p.position && <span>{p.detailedPosition}</span>}
-                <span aria-hidden>·</span><span>{p.team}</span>
-                {p.league && <><span aria-hidden>·</span><span>{p.league}</span></>}
+                <span aria-hidden>·</span>
+                <span>{p.team}</span>
+                {p.league && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{p.league}</span>
+                  </>
+                )}
               </div>
               <p className="mt-1 text-sm text-secondary-500">
                 {p.nationality} · {p.age} years{p.jerseyNumber ? ` · #${p.jerseyNumber}` : ''}
@@ -100,10 +114,24 @@ export default function PlayerDetail() {
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to={`/compare?ids=${p.id}`}><Button variant="secondary" icon={GitCompare}>Compare</Button></Link>
-            <Link to={`/reports/new?playerId=${p.id}`}><Button variant="secondary" icon={ClipboardPlus}>Write report</Button></Link>
-            <Link to={`/players/${p.id}/edit`}><Button variant="secondary" icon={Pencil}>Edit</Button></Link>
-            <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>Delete</Button>
+            <Link to={`/compare?ids=${p.id}`}>
+              <Button variant="secondary" icon={GitCompare}>
+                Compare
+              </Button>
+            </Link>
+            <Link to={`/reports/new?playerId=${p.id}`}>
+              <Button variant="secondary" icon={ClipboardPlus}>
+                Write report
+              </Button>
+            </Link>
+            <Link to={`/players/${p.id}/edit`}>
+              <Button variant="secondary" icon={Pencil}>
+                Edit
+              </Button>
+            </Link>
+            <Button variant="danger" icon={Trash2} onClick={() => setConfirming(true)}>
+              Delete
+            </Button>
           </div>
         </div>
       </Card>
@@ -142,37 +170,73 @@ export default function PlayerDetail() {
         </Card>
         <Card title="Contract & market">
           <dl className="divide-y divide-secondary-100">
-            <InfoRow label="Market value" value={p.marketValue != null ? formatMoney(p.marketValue) : null} note={marketValueNote(p)} />
-            <InfoRow label="Weekly salary" value={p.contractSalary != null ? formatMoney(p.contractSalary) : null}
-              note={p.contractSalary != null ? 'Unit assumed: weekly, EUR' : null} />
+            <InfoRow
+              label="Market value"
+              value={p.marketValue != null ? formatMoney(p.marketValue) : null}
+              note={marketValueNote(p)}
+            />
+            <InfoRow
+              label="Weekly salary"
+              value={p.contractSalary != null ? formatMoney(p.contractSalary) : null}
+              note={p.contractSalary != null ? 'Unit assumed: weekly, EUR' : null}
+            />
             <InfoRow label="Contract until" value={formatDate(p.contractEnd)} />
             <InfoRow label="Preferred foot" value={p.preferredFoot} />
             <InfoRow label="Height / weight" value={p.height ? `${p.height} cm / ${p.weight} kg` : null} />
           </dl>
           <p className="mt-3 text-xs text-secondary-500">
-            Figures from the 2024-25 source data. <Link to="/dashboard#data-quality" className="underline">About the data</Link>
+            Figures from the 2024-25 source data.{' '}
+            <Link to="/dashboard#data-quality" className="underline">
+              About the data
+            </Link>
           </p>
         </Card>
       </div>
 
       {(p.marketValues.length > 1 || p.monthlyForm.length > 0) && (
         <div className="grid gap-6 lg:grid-cols-2">
-          {p.marketValues.length > 1 && <Card title="Market value over time"><ValueHistoryChart history={p.marketValues} /></Card>}
-          {p.monthlyForm.length > 0 && <Card title="Goals and assists by month"><MonthlyFormChart form={p.monthlyForm} /></Card>}
+          {p.marketValues.length > 1 && (
+            <Card title="Market value over time">
+              <ValueHistoryChart history={p.marketValues} />
+            </Card>
+          )}
+          {p.monthlyForm.length > 0 && (
+            <Card title="Goals and assists by month">
+              <MonthlyFormChart form={p.monthlyForm} />
+            </Card>
+          )}
         </div>
       )}
 
       <Card title={`Scouting reports (${reportCount})`}>
         {reportCount === 0 ? (
-          <EmptyState icon={ClipboardList} title="No reports yet" message={`Be the first to scout ${p.name}.`}
-            action={<Link to={`/reports/new?playerId=${p.id}`}><Button size="sm" variant="secondary" icon={ClipboardPlus}>Write a report</Button></Link>} />
+          <EmptyState
+            icon={ClipboardList}
+            title="No reports yet"
+            message={`Be the first to scout ${p.name}.`}
+            action={
+              <Link to={`/reports/new?playerId=${p.id}`}>
+                <Button size="sm" variant="secondary" icon={ClipboardPlus}>
+                  Write a report
+                </Button>
+              </Link>
+            }
+          />
         ) : (
           <ul className="divide-y divide-secondary-100">
             {p.reports.map((r) => (
               <li key={r.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <Link to={`/reports/${r.id}`} className="text-sm font-semibold text-secondary-900 hover:text-primary-700">vs {r.opponent} · {formatDate(r.matchDate)}</Link>
-                  <p className="text-xs text-secondary-500">By {r.scout.name}{r.competition ? ` · ${r.competition}` : ''}</p>
+                  <Link
+                    to={`/reports/${r.id}`}
+                    className="text-sm font-semibold text-secondary-900 hover:text-primary-700"
+                  >
+                    vs {r.opponent} · {formatDate(r.matchDate)}
+                  </Link>
+                  <p className="text-xs text-secondary-500">
+                    By {r.scout.name}
+                    {r.competition ? ` · ${r.competition}` : ''}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-semibold tabular-nums">{r.overallRating}/10</span>
@@ -187,9 +251,11 @@ export default function PlayerDetail() {
       <ConfirmDialog
         open={confirming}
         title={`Delete ${p.name}?`}
-        message={reportCount
-          ? `This also deletes ${reportCount} scouting report${reportCount > 1 ? 's' : ''}, plus their value history and form data. This can't be undone.`
-          : "Their attributes, value history and form data are deleted too. This can't be undone."}
+        message={
+          reportCount
+            ? `This also deletes ${reportCount} scouting report${reportCount > 1 ? 's' : ''}, plus their value history and form data. This can't be undone.`
+            : "Their attributes, value history and form data are deleted too. This can't be undone."
+        }
         loading={deleting}
         onConfirm={handleDelete}
         onCancel={() => setConfirming(false)}
