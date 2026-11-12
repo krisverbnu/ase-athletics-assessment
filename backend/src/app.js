@@ -18,7 +18,8 @@ const allowedOrigins = (process.env.CLIENT_URL || '')
   .split(',')
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
-app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : '*' }));
+// updated to fail closed: if the list were ever empty, no website would be allowed, never every website
+app.use(cors({ origin: allowedOrigins }));
 
 // Read JSON bodies, max 100 kB so nobody can flood us with huge requests
 app.use(express.json({ limit: '100kb' }));
