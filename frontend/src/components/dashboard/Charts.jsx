@@ -22,7 +22,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { buildTrendRows } from '../../utils/chartData';
 import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { formatMoney, POSITION_COLORS, SERIES_COLORS } from '../../utils/format';
@@ -244,17 +244,39 @@ export function AttributesRadar({ data }) {
 }
 
 // 5. Players per team: horizontal bars (long team names read better sideways), top 10.
-//    With onSelect, clicking a bar or a team name opens that team's players.
-export function TeamsChart({ data, onSelect }) {
+//    With linkFor, each team name is a real link (Tab reaches it, Enter opens it,
+//    screen readers announce it), and clicking a bar opens the same page.
+function TeamTick({ x, y, payload, linkFor }) {
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <Link to={linkFor(payload.value)} className="group outline-none" aria-label={`${payload.value}: show players`}>
+        <text
+          x={-4}
+          dy={4}
+          textAnchor="end"
+          fontSize={AXIS.fontSize}
+          fill="#475569"
+          className="group-hover:underline group-focus-visible:fill-primary-700 group-focus-visible:underline"
+        >
+          {payload.value}
+        </text>
+      </Link>
+    </g>
+  );
+}
+
+export function TeamsChart({ data, linkFor }) {
+  const navigate = useNavigate();
+  const onSelect = linkFor ? (team) => navigate(linkFor(team)) : undefined;
   const rows = data.slice(0, 10);
   return (
     <ResponsiveContainer
       width="100%"
       height={Math.max(160, rows.length * 32)}
-      // Hand cursor only over the bars and the team names, which open that team's players
+      // Hand cursor over the bars too (the team names are links, so they already have one)
       className={
         onSelect
-          ? '[&_.recharts-bar-rectangle]:cursor-pointer [&_.recharts-bar-background-rectangle]:cursor-pointer [&_.recharts-yAxis-tick-labels_text]:cursor-pointer'
+          ? '[&_.recharts-bar-rectangle]:cursor-pointer [&_.recharts-bar-background-rectangle]:cursor-pointer'
           : ''
       }
     >
@@ -265,10 +287,9 @@ export function TeamsChart({ data, onSelect }) {
           type="category"
           dataKey="team"
           width={140}
-          tick={{ ...AXIS, fill: '#475569' }}
+          tick={linkFor ? (props) => <TeamTick {...props} linkFor={linkFor} /> : { ...AXIS, fill: '#475569' }}
           tickLine={false}
           axisLine={false}
-          onClick={onSelect ? (tick) => onSelect(tick.value) : undefined}
         />
         <Tooltip {...TOOLTIP} formatter={(v) => [v, 'Players']} />
         {/* The see-through background stretches each row's click area across the whole chart */}

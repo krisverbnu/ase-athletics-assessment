@@ -259,7 +259,7 @@ function DashboardContent({ stats, filters }) {
             ])
           }
         >
-          <TeamsChart data={stats.teams} onSelect={(team) => navigate(teamLink(filters, team))} />
+          <TeamsChart data={stats.teams} linkFor={(team) => teamLink(filters, team)} />
         </ChartCard>
       </div>
 
