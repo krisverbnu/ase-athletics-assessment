@@ -331,6 +331,7 @@ Step-by-step setup, environment variables and troubleshooting: [docs/deployment-
 - Import market values from a licensed data provider, with source and date per value
 - Saved searches and watch lists per scout
 
-## How this was built
+## AI Assistance
 
-I built this with Claude Code as a coding assistant: planning, writing code, and debugging. I made the decisions, tested each feature, and can walk through any file and explain why it works the way it does. The problems I hit along the way, what caused them and how they were solved are logged in [docs/challenges.md](docs/challenges.md).
+Claude Code was used to assist with development, implementation and debugging.
+
