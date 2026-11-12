@@ -30,7 +30,7 @@ Built by **Kristina Verbova** for the ASE Athletics technical assessment, Novemb
 - [Performance](#performance)
 - [Deployment](#deployment)
 - [What I'd do next](#what-id-do-next)
-- [How this was built](#how-this-was-built)
+- [AI assistance](#ai-assistance)
 
 ## Documentation
 
@@ -333,5 +333,5 @@ Step-by-step setup, environment variables and troubleshooting: [docs/deployment-
 
 ## AI Assistance
 
-Claude Code was used to assist with development, implementation and debugging.
+Claude Code was used to assist with development, implementation and debugging. The problems I hit along the way and how they were solved are logged in [docs/challenges.md](docs/challenges.md).
 

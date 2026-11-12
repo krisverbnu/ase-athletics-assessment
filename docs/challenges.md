@@ -2,7 +2,7 @@
 
 A log of the real problems hit while building this app, newest first. Each entry follows the same shape: **symptom** (what I saw), **cause** (what was really going on), **fix**, **lesson**.
 
-A note on context: I built this with Claude Code as a coding assistant. Some entries mention files being "copied onto the Mac": the assistant wrote and tested code in its own environment, and changes were then copied into my local repository. See [How this was built](../README.md#how-this-was-built).
+A note on context: I built this with Claude Code as a coding assistant. Some entries mention files being "copied onto the Mac": the assistant wrote and tested code in its own environment, and changes were then copied into my local repository. See [AI assistance](../README.md#ai-assistance).
 
 ## Contents
 
