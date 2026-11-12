@@ -25,6 +25,7 @@ import DataQualityCard from '../components/dashboard/DataQualityCard';
 import { useApi } from '../hooks';
 import { getDashboardStats } from '../services/dashboardService';
 import { downloadCsv } from '../utils/csv';
+import { AGE_RANGES, ageLink, playersLink, positionLink, teamLink } from '../utils/dashboardLinks';
 import { countActive, filtersToParams, readFilters } from '../utils/filters';
 import { formatDate, formatMoney } from '../utils/format';
 
@@ -102,28 +103,12 @@ export default function Dashboard() {
   );
 }
 
-// Age groups on the dashboard -> the same ranges as Players filters (ages are whole numbers)
-const AGE_RANGES = {
-  'Under 21': { ageMin: undefined, ageMax: 20 },
-  '21-25': { ageMin: 21, ageMax: 25 },
-  '26-29': { ageMin: 26, ageMax: 29 },
-  '30+': { ageMin: 30, ageMax: undefined },
-};
-
 const PLURAL = { Goalkeeper: 'Goalkeepers', Defender: 'Defenders', Midfielder: 'Midfielders', Forward: 'Forwards' };
 
 function DashboardContent({ stats, filters }) {
   const { kpis } = stats;
   const navigate = useNavigate();
 
-  // Links into the player list keep the dashboard's filters (e.g. a team) and add one more,
-  // so "Forwards" from a Bayern-only dashboard shows Bayern's forwards
-  const playersLink = (changes = {}, extra = {}) => {
-    const query = new URLSearchParams({ ...filtersToParams({ ...filters, ...changes }), ...extra }).toString();
-    return query ? `/players?${query}` : '/players';
-  };
-  const positionLink = (position) => playersLink({ position: [position] }, { sort: 'goals', order: 'desc' });
-  const ageLink = (label) => playersLink(AGE_RANGES[label]);
   const mostValuable = stats.mostValuable[0];
   const topTrends = [...stats.marketValueTrends]
     .sort((a, b) => b.history.at(-1).value - a.history.at(-1).value)
@@ -138,7 +123,7 @@ function DashboardContent({ stats, filters }) {
           icon={Users}
           value={kpis.totalPlayers}
           detail={`Average age ${kpis.averageAge}`}
-          to={playersLink()}
+          to={playersLink(filters)}
           linkText="View players"
         />
         <StatTile
@@ -186,7 +171,10 @@ function DashboardContent({ stats, filters }) {
             ])
           }
         >
-          <GoalsByPositionChart data={stats.byPosition} onSelect={(position) => navigate(positionLink(position))} />
+          <GoalsByPositionChart
+            data={stats.byPosition}
+            onSelect={(position) => navigate(positionLink(filters, position))}
+          />
           {/* The same links as clicking the bars, for keyboard and screen reader users */}
           <p className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-secondary-500">
             <span>See players:</span>
@@ -195,7 +183,7 @@ function DashboardContent({ stats, filters }) {
               .map((row) => (
                 <Link
                   key={row.position}
-                  to={positionLink(row.position)}
+                  to={positionLink(filters, row.position)}
                   className="font-medium text-primary-700 underline decoration-primary-300 underline-offset-2 hover:decoration-primary-700"
                 >
                   {PLURAL[row.position] ?? row.position}
@@ -215,8 +203,8 @@ function DashboardContent({ stats, filters }) {
         >
           <AgeGroupsChart
             data={stats.ageGroups}
-            linkFor={ageLink}
-            onSelect={(label) => AGE_RANGES[label] && navigate(ageLink(label))}
+            linkFor={(label) => ageLink(filters, label)}
+            onSelect={(label) => AGE_RANGES[label] && navigate(ageLink(filters, label))}
           />
         </ChartCard>
       </div>
@@ -271,7 +259,7 @@ function DashboardContent({ stats, filters }) {
             ])
           }
         >
-          <TeamsChart data={stats.teams} onSelect={(team) => navigate(playersLink({ team: [team] }))} />
+          <TeamsChart data={stats.teams} onSelect={(team) => navigate(teamLink(filters, team))} />
         </ChartCard>
       </div>
 

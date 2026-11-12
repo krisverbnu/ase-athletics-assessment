@@ -123,4 +123,4 @@ Every page shows a skeleton while `loading`, an error with a "Try again" button 
 | **Responsive design** | Tables become cards on phones; tested from 320px to 1440px with no sideways scrolling |
 | **Performance** | Indexed columns, paginated lists, one request per dashboard, pages loaded on demand. See [decisions.md](decisions.md#performance) |
 | **Missing data** | Never shown as 0; labelled with its source. See [data-quality.md](data-quality.md) |
-| **Testing** | 43 API tests and 12 frontend tests, run on every push. See the [README](../README.md#tests-and-ci) |
+| **Testing** | 43 API tests and 18 frontend tests, run on every push. See the [README](../README.md#tests-and-ci) |
