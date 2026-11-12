@@ -8,6 +8,9 @@ A note on context: I built this with Claude Code as a coding assistant. Some ent
 
 | Area | Challenge |
 |---|---|
+| Workflow | [Commits that were too big to follow](#commits-that-were-too-big-to-follow) |
+| Frontend | [Chart clicks didn't say which bar was clicked](#chart-clicks-didnt-say-which-bar-was-clicked) |
+| Repository | [Stray files committed: duplicate workflows and unused Neon setup files](#stray-files-committed-duplicate-workflows-and-unused-neon-setup-files) |
 | Deployment | [Live site: login blocked by CORS](#live-site-login-blocked-by-cors) |
 | Frontend | [Chart legends and tooltips in the wrong order](#chart-legends-and-tooltips-in-the-wrong-order) |
 | Frontend | [Mobile check: invisible text widening the page, and cut-off player rows](#mobile-check-invisible-text-widening-the-page-and-cut-off-player-rows) |
@@ -19,6 +22,70 @@ A note on context: I built this with Claude Code as a coding assistant. Some ent
 | Local setup | ["Cannot reach the server" after restarting](#cannot-reach-the-server-after-restarting) |
 | Frontend, API | [Dashboard went white after the contracts update](#dashboard-went-white-after-the-contracts-update) |
 | Various | [Earlier challenges in the build](#earlier-challenges-in-the-build) |
+
+## Commits that were too big to follow
+
+Not a bug, but a working habit I changed partway through.
+
+**Symptom.** Looking back at the history, the early commits are each a whole feature: "Add frontend: auth, layout, player list, profile and form" is 38 files and about 2,600 lines, and "Add full REST API" is 27 files. One later commit bundled documentation, Prettier, linting and a new workflow into 85 files. A reviewer can't easily see what changed and why, and if one part had broken something, it couldn't have been undone on its own.
+
+**Cause.** At the start I was building fast and committing at milestones ("the frontend works now") rather than after each change. When several unrelated tasks were finished together, they went into one commit.
+
+**Fix.**
+
+1. Switched to one commit per change: the dashboard links, then moving them into a tested helper, then making the club names keyboard links, each with its own commit and a message saying what it does.
+2. When several steps touch the same file, did them one at a time: make the change, commit, push, then the next.
+3. Left the earlier history as it is rather than rewriting it with a force push: it's an honest record of how the project was built.
+
+**Lesson.**
+
+- One commit = one change you could describe in a sentence. If the message needs "and" twice, it's probably two commits.
+- Small commits are easier to review, easier to undo, and make `git log` read like a diary of the project.
+- Commit when something works, not when everything works.
+
+## Chart clicks didn't say which bar was clicked
+
+Making the dashboard clickable (top scorer to his profile, each position, club or age group to those players) worked for the cards and links straight away, but not for the bars.
+
+**Symptom.** Clicking a bar in "Goals and assists by position" did nothing. Logging what the chart passed to the click handler showed `activeIndex: null` and no `activeLabel`: Recharts knew where the click happened, but not which position it was on.
+
+**Cause.** The click was attached to the whole chart, which relies on the tooltip's "active" state to know which category is under the mouse. In Recharts 3 that state wasn't set at the moment of the click, so the handler had nothing to go on.
+
+**Fix.**
+
+1. Moved the click onto the bars themselves: each bar's own data includes its position or club.
+2. Gave each bar an invisible full-height background, so short bars (goalkeepers) are still easy to hit.
+3. Limited the hand cursor to the parts that can be clicked, so it never shows over gaps where clicking does nothing.
+4. Added real links for keyboard and screen reader users, because chart shapes can't be focused: a row of position links under the chart, age legend rows as links, and club names drawn as links inside the chart.
+5. Moved the link-building into `utils/dashboardLinks.js` and tested it (each link keeps the dashboard's filters and adds one).
+
+**Lesson.**
+
+- When a handler does nothing, log what it receives before guessing. One line showed the data simply wasn't there.
+- Attach clicks to the thing that owns the data (the bar), not to its container.
+- Anything you can do with the mouse on a chart should also exist as a normal link.
+
+## Stray files committed: duplicate workflows and unused Neon setup files
+
+While checking the repo before making it public, some files turned up that the app never uses.
+
+**Symptom.** A folder with second copies of `ci.yml` and `keep-awake.yml` sat next to `.github/workflows`. At the top level there were also `neon.ts`, `package.json` and `package-lock.json`, which nothing in the app refers to.
+
+**Cause.**
+
+- The workflow files had been downloaded into the project folder, and `git add .` committed everything new, including that folder.
+- The top-level Neon files were created early on by Neon's setup tool. Render only builds `backend`, Vercel only builds `frontend`, and CI runs inside those two folders, so these files did nothing.
+
+**Fix.**
+
+1. Checked the copies were identical to the real workflows, and that GitHub only runs files from `.github/workflows`.
+2. Checked that the secret files next to them (`.env.local`, `.neon`) had never been committed and are covered by `.gitignore`.
+3. Removed the stray files with `git rm`, and added a local-only ignore rule (`.git/info/exclude`) so downloads can't be committed by accident.
+
+**Lesson.**
+
+- Run `git status` before `git add .` and read the list: anything you don't recognise shouldn't go in.
+- Look at the repo the way a reviewer will before making it public: every file should have a reason to be there.
 
 ## Live site: login blocked by CORS
 
