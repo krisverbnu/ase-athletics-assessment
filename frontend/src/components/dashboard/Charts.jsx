@@ -22,22 +22,57 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { Link } from 'react-router';
 import { buildTrendRows } from '../../utils/chartData';
 import { AXIS, AXIS_LINE, GRID, LEGEND, LINE_CURSOR, TOOLTIP } from '../../utils/chartTheme';
 import { formatMoney, POSITION_COLORS, SERIES_COLORS } from '../../utils/format';
 
-// 1. Goals and assists by position: grouped bars, one axis (both are counts)
-export function GoalsByPositionChart({ data }) {
+// 1. Goals and assists by position: grouped bars, one axis (both are counts).
+//    With onSelect, clicking a position's bars (or its name) opens those players.
+export function GoalsByPositionChart({ data, onSelect }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ResponsiveContainer
+      width="100%"
+      height={280}
+      // Hand cursor only over the parts that can be clicked: the bars and the position names
+      className={
+        onSelect
+          ? '[&_.recharts-bar-rectangle]:cursor-pointer [&_.recharts-bar-background-rectangle]:cursor-pointer [&_.recharts-xAxis-tick-labels_text]:cursor-pointer'
+          : ''
+      }
+    >
       <BarChart data={data} margin={{ top: 8, right: 8, left: -8, bottom: 0 }} barGap={2} barCategoryGap="28%">
         <CartesianGrid stroke={GRID} vertical={false} />
-        <XAxis dataKey="position" interval={0} tick={AXIS} tickLine={false} axisLine={AXIS_LINE} />
+        <XAxis
+          dataKey="position"
+          interval={0}
+          tick={AXIS}
+          tickLine={false}
+          axisLine={AXIS_LINE}
+          onClick={onSelect ? (tick) => onSelect(tick.value) : undefined}
+        />
         <YAxis tick={AXIS} tickLine={false} axisLine={false} allowDecimals={false} />
         <Tooltip {...TOOLTIP} />
         <Legend {...LEGEND} />
-        <Bar isAnimationActive={false} dataKey="goals" name="Goals" fill={SERIES_COLORS[0]} radius={[4, 4, 0, 0]} />
-        <Bar isAnimationActive={false} dataKey="assists" name="Assists" fill={SERIES_COLORS[1]} radius={[4, 4, 0, 0]} />
+        {/* A see-through full-height background behind each bar makes even short bars easy to click */}
+        <Bar
+          isAnimationActive={false}
+          dataKey="goals"
+          name="Goals"
+          fill={SERIES_COLORS[0]}
+          radius={[4, 4, 0, 0]}
+          background={onSelect ? { fill: 'transparent' } : undefined}
+          onClick={onSelect ? (bar) => onSelect(bar.payload.position) : undefined}
+        />
+        <Bar
+          isAnimationActive={false}
+          dataKey="assists"
+          name="Assists"
+          fill={SERIES_COLORS[1]}
+          radius={[4, 4, 0, 0]}
+          background={onSelect ? { fill: 'transparent' } : undefined}
+          onClick={onSelect ? (bar) => onSelect(bar.payload.position) : undefined}
+        />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -45,9 +80,10 @@ export function GoalsByPositionChart({ data }) {
 
 // 2. Age groups: a donut. Ages are ordered (young -> old), so one hue from light to dark,
 //    not four unrelated colours. White gaps separate the slices.
+//    With linkFor, each slice and legend row opens the players in that age group.
 const AGE_SHADES = ['#bae6fd', '#38bdf8', '#0284c7', '#075985'];
 
-export function AgeGroupsChart({ data }) {
+export function AgeGroupsChart({ data, linkFor, onSelect }) {
   const total = data.reduce((n, d) => n + d.players, 0);
   return (
     <div className="flex flex-col items-center gap-4 sm:flex-row">
@@ -63,6 +99,8 @@ export function AgeGroupsChart({ data }) {
               stroke="#ffffff"
               strokeWidth={2}
               isAnimationActive={false}
+              onClick={onSelect ? (slice) => onSelect(slice.payload?.label ?? slice.label) : undefined}
+              style={onSelect ? { cursor: 'pointer' } : undefined}
             >
               {data.map((d, i) => (
                 <Cell key={d.label} fill={AGE_SHADES[i]} />
@@ -79,18 +117,37 @@ export function AgeGroupsChart({ data }) {
       </div>
       {/* Legend with the exact numbers, so the chart never relies on colour alone */}
       <ul className="flex w-full flex-col gap-2">
-        {data.map((d, i) => (
-          <li key={d.label} className="flex items-center justify-between gap-3 text-sm">
-            <span className="flex items-center gap-2 text-secondary-700">
-              <span className="size-3 rounded-full" style={{ background: AGE_SHADES[i] }} aria-hidden />
-              {d.label}
-            </span>
-            <span className="tabular-nums text-secondary-900">
-              {d.players}{' '}
-              <span className="text-secondary-500">({total ? Math.round((d.players / total) * 100) : 0}%)</span>
-            </span>
-          </li>
-        ))}
+        {data.map((d, i) => {
+          const row = (
+            <>
+              <span className="flex items-center gap-2 text-secondary-700">
+                <span className="size-3 rounded-full" style={{ background: AGE_SHADES[i] }} aria-hidden />
+                <span className={linkFor && d.players ? 'underline decoration-secondary-300 underline-offset-2' : ''}>
+                  {d.label}
+                </span>
+              </span>
+              <span className="tabular-nums text-secondary-900">
+                {d.players}{' '}
+                <span className="text-secondary-500">({total ? Math.round((d.players / total) * 100) : 0}%)</span>
+              </span>
+            </>
+          );
+          return (
+            <li key={d.label} className="text-sm">
+              {linkFor && d.players ? (
+                <Link
+                  to={linkFor(d.label)}
+                  className="-mx-2 flex items-center justify-between gap-3 rounded px-2 py-0.5 hover:bg-secondary-50"
+                  aria-label={`${d.label}: ${d.players} players. Show them`}
+                >
+                  {row}
+                </Link>
+              ) : (
+                <div className="flex items-center justify-between gap-3 py-0.5">{row}</div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     </div>
   );
@@ -186,11 +243,21 @@ export function AttributesRadar({ data }) {
   );
 }
 
-// 5. Players per team: horizontal bars (long team names read better sideways), top 10
-export function TeamsChart({ data }) {
+// 5. Players per team: horizontal bars (long team names read better sideways), top 10.
+//    With onSelect, clicking a bar or a team name opens that team's players.
+export function TeamsChart({ data, onSelect }) {
   const rows = data.slice(0, 10);
   return (
-    <ResponsiveContainer width="100%" height={Math.max(160, rows.length * 32)}>
+    <ResponsiveContainer
+      width="100%"
+      height={Math.max(160, rows.length * 32)}
+      // Hand cursor only over the bars and the team names, which open that team's players
+      className={
+        onSelect
+          ? '[&_.recharts-bar-rectangle]:cursor-pointer [&_.recharts-bar-background-rectangle]:cursor-pointer [&_.recharts-yAxis-tick-labels_text]:cursor-pointer'
+          : ''
+      }
+    >
       <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 24, left: 8, bottom: 0 }} barCategoryGap={6}>
         <CartesianGrid stroke={GRID} horizontal={false} />
         <XAxis type="number" allowDecimals={false} tick={AXIS} tickLine={false} axisLine={false} />
@@ -201,9 +268,18 @@ export function TeamsChart({ data }) {
           tick={{ ...AXIS, fill: '#475569' }}
           tickLine={false}
           axisLine={false}
+          onClick={onSelect ? (tick) => onSelect(tick.value) : undefined}
         />
         <Tooltip {...TOOLTIP} formatter={(v) => [v, 'Players']} />
-        <Bar isAnimationActive={false} dataKey="players" fill={SERIES_COLORS[0]} radius={[0, 4, 4, 0]} />
+        {/* The see-through background stretches each row's click area across the whole chart */}
+        <Bar
+          isAnimationActive={false}
+          dataKey="players"
+          fill={SERIES_COLORS[0]}
+          radius={[0, 4, 4, 0]}
+          background={onSelect ? { fill: 'transparent' } : undefined}
+          onClick={onSelect ? (bar) => onSelect(bar.payload.team) : undefined}
+        />
       </BarChart>
     </ResponsiveContainer>
   );

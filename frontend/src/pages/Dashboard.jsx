@@ -2,7 +2,7 @@
 // which accepts the same filters as the player list, so all cards and charts
 // update together when a filter changes. Filters live in the URL, like on Players.
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router';
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router';
 import { CalendarClock, ChartLine, Coins, Goal, SearchX, SlidersHorizontal, Users } from 'lucide-react';
 import Button from '../components/common/Button';
 import Card from '../components/common/Card';
@@ -94,7 +94,7 @@ export default function Dashboard() {
           />
         </Card>
       )}
-      {response && response.data.kpis.totalPlayers > 0 && <DashboardContent stats={response.data} />}
+      {response && response.data.kpis.totalPlayers > 0 && <DashboardContent stats={response.data} filters={filters} />}
       {response && response.data.dataQuality && (
         <DataQualityCard quality={response.data.dataQuality} dataDate={formatDate(response.meta.dataDate)} />
       )}
@@ -102,8 +102,28 @@ export default function Dashboard() {
   );
 }
 
-function DashboardContent({ stats }) {
+// Age groups on the dashboard -> the same ranges as Players filters (ages are whole numbers)
+const AGE_RANGES = {
+  'Under 21': { ageMin: undefined, ageMax: 20 },
+  '21-25': { ageMin: 21, ageMax: 25 },
+  '26-29': { ageMin: 26, ageMax: 29 },
+  '30+': { ageMin: 30, ageMax: undefined },
+};
+
+const PLURAL = { Goalkeeper: 'Goalkeepers', Defender: 'Defenders', Midfielder: 'Midfielders', Forward: 'Forwards' };
+
+function DashboardContent({ stats, filters }) {
   const { kpis } = stats;
+  const navigate = useNavigate();
+
+  // Links into the player list keep the dashboard's filters (e.g. a team) and add one more,
+  // so "Forwards" from a Bayern-only dashboard shows Bayern's forwards
+  const playersLink = (changes = {}, extra = {}) => {
+    const query = new URLSearchParams({ ...filtersToParams({ ...filters, ...changes }), ...extra }).toString();
+    return query ? `/players?${query}` : '/players';
+  };
+  const positionLink = (position) => playersLink({ position: [position] }, { sort: 'goals', order: 'desc' });
+  const ageLink = (label) => playersLink(AGE_RANGES[label]);
   const mostValuable = stats.mostValuable[0];
   const topTrends = [...stats.marketValueTrends]
     .sort((a, b) => b.history.at(-1).value - a.history.at(-1).value)
@@ -113,12 +133,21 @@ function DashboardContent({ stats }) {
     <>
       {/* KPI cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatTile label="Players" icon={Users} value={kpis.totalPlayers} detail={`Average age ${kpis.averageAge}`} />
+        <StatTile
+          label="Players"
+          icon={Users}
+          value={kpis.totalPlayers}
+          detail={`Average age ${kpis.averageAge}`}
+          to={playersLink()}
+          linkText="View players"
+        />
         <StatTile
           label="Top scorer"
           icon={Goal}
           value={kpis.topScorer?.name ?? '–'}
           detail={kpis.topScorer ? `${kpis.topScorer.goals} goals · ${kpis.topScorer.team}` : null}
+          to={kpis.topScorer ? `/players/${kpis.topScorer.id}` : undefined}
+          linkText="View profile"
         />
         <StatTile
           label="Most valuable"
@@ -129,6 +158,8 @@ function DashboardContent({ stats }) {
               ? `${formatMoney(mostValuable.marketValue)} · ${kpis.playersWithMarketValue} players valued`
               : 'Market values not available'
           }
+          to={mostValuable ? `/players/${mostValuable.id}` : undefined}
+          linkText="View profile"
         />
         {stats.contractStatus ? (
           <ContractsTile status={stats.contractStatus} />
@@ -155,7 +186,22 @@ function DashboardContent({ stats }) {
             ])
           }
         >
-          <GoalsByPositionChart data={stats.byPosition} />
+          <GoalsByPositionChart data={stats.byPosition} onSelect={(position) => navigate(positionLink(position))} />
+          {/* The same links as clicking the bars, for keyboard and screen reader users */}
+          <p className="mt-2 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-sm text-secondary-500">
+            <span>See players:</span>
+            {stats.byPosition
+              .filter((row) => row.players > 0)
+              .map((row) => (
+                <Link
+                  key={row.position}
+                  to={positionLink(row.position)}
+                  className="font-medium text-primary-700 underline decoration-primary-300 underline-offset-2 hover:decoration-primary-700"
+                >
+                  {PLURAL[row.position] ?? row.position}
+                </Link>
+              ))}
+          </p>
         </ChartCard>
         <ChartCard
           title="Age profile"
@@ -167,7 +213,11 @@ function DashboardContent({ stats }) {
             ])
           }
         >
-          <AgeGroupsChart data={stats.ageGroups} />
+          <AgeGroupsChart
+            data={stats.ageGroups}
+            linkFor={ageLink}
+            onSelect={(label) => AGE_RANGES[label] && navigate(ageLink(label))}
+          />
         </ChartCard>
       </div>
 
@@ -213,7 +263,7 @@ function DashboardContent({ stats }) {
         </ChartCard>
         <ChartCard
           title="Players per team"
-          subtitle="Top 10 clubs in the database"
+          subtitle="Top 10 clubs in the database. Click a club to see its players"
           onExport={() =>
             downloadCsv('players-per-team.csv', stats.teams, [
               { label: 'Team', value: (r) => r.team },
@@ -221,7 +271,7 @@ function DashboardContent({ stats }) {
             ])
           }
         >
-          <TeamsChart data={stats.teams} />
+          <TeamsChart data={stats.teams} onSelect={(team) => navigate(playersLink({ team: [team] }))} />
         </ChartCard>
       </div>
 

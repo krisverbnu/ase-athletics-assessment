@@ -66,6 +66,7 @@ Built by **Kristina Verbova** for the ASE Athletics technical assessment, Novemb
 **Dashboard**
 - KPIs, goals and assists by position, age profile, market value trends, top attributes, contracts ending soon
 - Filter the whole dashboard with the same filters as the player list
+- Click through to the players behind a number: the top scorer and most valuable cards open their profiles, and each position bar, club bar or age group opens the player list already filtered (keeping any dashboard filters)
 - Contract figures shown from the data date and from today, side by side
 - A data quality panel showing how complete each field is
 
