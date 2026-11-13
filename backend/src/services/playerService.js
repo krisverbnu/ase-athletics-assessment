@@ -49,7 +49,8 @@ async function listPlayers(query) {
   const { page, limit, sort, order, ...filters } = query;
   const where = buildWhere(filters);
 
-  // Run the page query and the count at the same time
+  // Run the page query and the count in one transaction, so both see the same data:
+  // if a player is added in between, the total still matches the rows ("page 2 of 4" stays right)
   const [players, total] = await prisma.$transaction([
     prisma.player.findMany({
       where,

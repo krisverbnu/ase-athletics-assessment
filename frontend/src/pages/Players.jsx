@@ -80,7 +80,7 @@ export default function Players() {
   const [searchText, setSearchText] = useState(q);
   const [showFilters, setShowFilters] = useState(activeCount > 0);
   const [exporting, setExporting] = useState(false);
-  
+
   // Players ticked for comparison live in the URL (?compare=4,12), like every other part
   // of the view, so the selection survives a refresh and can be shared as a link
   const compareIds = (params.get('compare') || '').split(',').filter(Boolean).map(Number);
