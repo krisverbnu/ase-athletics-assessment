@@ -11,7 +11,26 @@ if (missing.length) {
 }
 
 const app = require('./app');
+const prisma = require('./utils/prisma');
 
 // use render port if available, otherwise default to 5001
 const PORT = process.env.PORT || 5001;
-app.listen(PORT, () => console.log(`API running on port ${PORT} (docs: http://localhost:${PORT}/api/docs)`));
+const server = app.listen(PORT, () =>
+  console.log(`API running on port ${PORT} (docs: http://localhost:${PORT}/api/docs)`),
+);
+
+// Clean shutdown. Render sends SIGTERM before replacing this server on every deploy,
+// and Ctrl+C sends SIGINT locally. Stop accepting new requests, let the ones already
+// running finish, close the database connection, then exit.
+function shutdown(signal) {
+  console.log(`${signal} received: finishing current requests, then stopping.`);
+  server.close(async () => {
+    await prisma.$disconnect();
+    process.exit(0);
+  });
+  // Safety net: if something hangs, don't wait forever
+  setTimeout(() => process.exit(1), 10_000).unref();
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
