@@ -80,11 +80,29 @@ export default function Players() {
   const [searchText, setSearchText] = useState(q);
   const [showFilters, setShowFilters] = useState(activeCount > 0);
   const [exporting, setExporting] = useState(false);
-  const [compareIds, setCompareIds] = useState([]); // players ticked for comparison
+  
+  // Players ticked for comparison live in the URL (?compare=4,12), like every other part
+  // of the view, so the selection survives a refresh and can be shared as a link
+  const compareIds = (params.get('compare') || '').split(',').filter(Boolean).map(Number);
+
+  const setCompareIds = (ids) =>
+    setParams(
+      (current) => {
+        const next = new URLSearchParams(current);
+        if (ids.length) next.set('compare', ids.join(','));
+        else next.delete('compare');
+        return next;
+      },
+      { replace: true }, // ticking boxes shouldn't fill up the back button's history
+    );
 
   const toggleCompare = (id) =>
-    setCompareIds((ids) =>
-      ids.includes(id) ? ids.filter((x) => x !== id) : ids.length < MAX_COMPARE ? [...ids, id] : ids,
+    setCompareIds(
+      compareIds.includes(id)
+        ? compareIds.filter((x) => x !== id)
+        : compareIds.length < MAX_COMPARE
+          ? [...compareIds, id]
+          : compareIds,
     );
 
   // Write a new view into the URL. Anything not mentioned in `changes` stays as it is.
@@ -96,6 +114,7 @@ export default function Players() {
       order: next.order,
       ...(next.q && { q: next.q }),
       ...filtersToParams(next.filters),
+      ...(compareIds.length && { compare: compareIds.join(',') }), // keep the ticked players
     });
   };
 
