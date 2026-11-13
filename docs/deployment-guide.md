@@ -102,6 +102,7 @@ A red ✗ on a commit means something broke before anyone has to click through t
 2. CI runs the tests.
 3. **Vercel** rebuilds the frontend (about 30 seconds).
 4. **Render** rebuilds the API, but only when something in `backend/` changed (about 2 to 3 minutes). Render's Events page shows each deploy as *Live* or *Failed*.
+   On startup the API checks that `DATABASE_URL`, `JWT_SECRET` and `CLIENT_URL` are set and refuses to start otherwise, so a deploy with a missing setting shows as *Failed* and the previous version stays live. When Render replaces the old server, it sends `SIGTERM`: the API stops taking new requests, lets the ones in progress finish, closes the database connection, then exits.
 5. If a deploy breaks something: Vercel → Deployments → *Instant Rollback*, or Render → Events → *Rollback* on the last good deploy.
 
 ## Secrets management
@@ -123,6 +124,7 @@ A red ✗ on a commit means something broke before anyone has to click through t
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
+| Render deploy fails and the log says **Missing environment variables: ...** | A required setting is missing on Render | Add the variables it names in Render → Environment; the previous version stays live until a deploy succeeds |
 | App says "Cannot reach the server" and the browser console says **blocked by CORS policy** | `CLIENT_URL` on Render doesn't exactly match the frontend address | Set it exactly (the API now ignores a trailing `/`), save, redeploy |
 | "Cannot reach the server", console shows a timeout | API asleep or down | Open `/api/health`, wait, try again; check Render Events |
 | Frontend calls `undefined/api/...` | `VITE_API_URL` missing on Vercel, or set after the last build | Set it and redeploy |

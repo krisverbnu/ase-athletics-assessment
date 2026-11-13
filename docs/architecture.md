@@ -119,6 +119,7 @@ Every page shows a skeleton while `loading`, an error with a "Try again" button 
 |---|---|
 | **Security** | Hashed passwords, JWT on every protected route, author-only report edits, rate limits, validation and stripping of unknown fields, Helmet headers, strict CORS. Details and trade-offs in the [README](../README.md#security) |
 | **Errors** | One error format from the API; one error-to-message function on the frontend; every page has loading, error and empty states |
+| **Reliability** | The API refuses to start without its required settings (fail fast), and CORS fails closed. On every deploy it shuts down gracefully, finishing requests already in progress |
 | **Accessibility** | Labelled inputs, keyboard navigation, visible focus, screen-reader text for icons and charts, colour never the only signal, motion off for "reduce motion" users |
 | **Responsive design** | Tables become cards on phones; tested from 320px to 1440px with no sideways scrolling |
 | **Performance** | Indexed columns, paginated lists, one request per dashboard, pages loaded on demand. See [decisions.md](decisions.md#performance) |

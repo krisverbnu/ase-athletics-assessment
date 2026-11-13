@@ -8,6 +8,7 @@ A note on context: I built this with Claude Code as a coding assistant. Some ent
 
 | Area | Challenge |
 |---|---|
+| Workflow | [A failed check didn't stop the commit](#a-failed-check-didnt-stop-the-commit) |
 | Workflow | [Commits that were too big to follow](#commits-that-were-too-big-to-follow) |
 | Frontend | [Chart clicks didn't say which bar was clicked](#chart-clicks-didnt-say-which-bar-was-clicked) |
 | Repository | [Stray files committed: duplicate workflows and unused Neon setup files](#stray-files-committed-duplicate-workflows-and-unused-neon-setup-files) |
@@ -22,6 +23,31 @@ A note on context: I built this with Claude Code as a coding assistant. Some ent
 | Local setup | ["Cannot reach the server" after restarting](#cannot-reach-the-server-after-restarting) |
 | Frontend, API | [Dashboard went white after the contracts update](#dashboard-went-white-after-the-contracts-update) |
 | Various | [Earlier challenges in the build](#earlier-challenges-in-the-build) |
+
+## A failed check didn't stop the commit
+
+Two small terminal mistakes in a row while committing code review fixes.
+
+**Symptom.**
+
+- Prettier printed `[warn] Code style issues found in src/pages/Players.jsx`, but the commit and push still went through, so CI on GitHub would fail its format check.
+- A commit typed as `git commit -m "Correct comments" git push` on one line failed with `error: pathspec 'git' did not match any file(s) known to git`.
+
+**Cause.**
+
+- `&&` only links commands on the same line: if one fails, the rest of that line is skipped. The `git add`, `commit` and `push` were on separate lines, so they ran anyway. The Prettier problem itself was a blank line containing two invisible spaces.
+- With commit and push on one line, git read `git` and `push` as file names to commit (a pathspec is a file path), couldn't find them, and stopped.
+
+**Fix.**
+
+1. Ran `npx prettier --write` on the file, checked again, and committed it.
+2. From then on, chained every commit onto its checks: `npm run lint && npm run format:check && npm test && git add ... && git commit -m "..." && git push`. The next time a check failed (a missing `require` in `index.js`), nothing was committed.
+
+**Lesson.**
+
+- Read the output before moving on: a `[warn]` means stop.
+- Chain the commit onto the checks, so a failure stops everything.
+- One command per line, unless they're joined with `&&`.
 
 ## Commits that were too big to follow
 
