@@ -4,6 +4,7 @@ import { Suspense, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router';
 import { BarChart3, ClipboardList, GitCompare, LogOut, Menu, Users, X } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import ErrorBoundary from '../common/ErrorBoundary';
 import { PageSkeleton } from '../common/States';
 
 const NAV = [
@@ -111,13 +112,17 @@ export default function Layout() {
       </header>
 
       <main className="mx-auto max-w-[1200px] px-4 py-6 lg:px-8 lg:py-8">
-        {/* While a page's code is downloading, show a spinner inside the layout (sidebar stays put) */}
-        <Suspense fallback={<PageSkeleton />}>
-          {/* A quick fade each time you open a different page */}
-          <div key={pathname} className="motion-safe:animate-fade-in">
-            <Outlet />
-          </div>
-        </Suspense>
+        {/* If a page crashes, show a message here instead of a white screen. Keyed by the
+            page's address, so moving to another page starts fresh */}
+        <ErrorBoundary key={pathname}>
+          {/* While a page's code is downloading, show a spinner inside the layout (sidebar stays put) */}
+          <Suspense fallback={<PageSkeleton />}>
+            {/* A quick fade each time you open a different page */}
+            <div className="motion-safe:animate-fade-in">
+              <Outlet />
+            </div>
+          </Suspense>
+        </ErrorBoundary>
       </main>
     </div>
   );
