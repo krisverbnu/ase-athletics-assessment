@@ -1,6 +1,7 @@
 // OpenAPI (Swagger) description of the API, shown as an interactive page at /api/docs.
 // Click "Authorize", paste a token from /auth/login, then "Try it out" on any endpoint.
 
+const { POSITIONS } = require('../validators/players');
 const errorResponse = (description, example) => ({
   description,
   content: { 'application/json': { schema: { $ref: '#/components/schemas/Error' }, example } },
@@ -119,7 +120,7 @@ module.exports = {
         required: ['name', 'position', 'age', 'team', 'nationality'],
         properties: {
           name: { type: 'string', example: 'Lamine Yamal' },
-          position: { type: 'string', enum: ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'] },
+          position: { type: 'string', enum: POSITIONS },
           detailedPosition: { type: 'string', example: 'Right Winger' },
           age: { type: 'integer', example: 18 },
           team: { type: 'string', example: 'Barcelona' },

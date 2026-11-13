@@ -5,6 +5,7 @@
 // With tens of thousands of players we'd move these into database GROUP BY queries.
 const prisma = require('../utils/prisma');
 const { buildWhere } = require('./playerService');
+const { POSITIONS } = require('../validators/players');
 
 // The data files are a snapshot from 8 July 2025 (2024-25 season).
 // "Expiring soon" is measured from this date by default, not from today,
@@ -21,7 +22,6 @@ const AGE_GROUPS = [
   { label: '26-29', test: (age) => age >= 26 && age <= 29 },
   { label: '30+', test: (age) => age >= 30 },
 ];
-const POSITIONS = ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'];
 const CORE_ATTRIBUTES = ['pace', 'shooting', 'passing', 'dribbling', 'defending', 'physical'];
 const MIN_MINUTES_FOR_PER_90 = 900; // 10 full matches, so one lucky cameo doesn't top the table
 

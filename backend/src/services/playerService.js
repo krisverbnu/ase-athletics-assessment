@@ -1,6 +1,7 @@
 // Player business logic: every database query about players lives here.
 const prisma = require('../utils/prisma');
 const HttpError = require('../utils/httpError');
+const { POSITIONS } = require('../validators/players');
 
 // Turn the validated filters into a Prisma "where" object.
 // Shared by the player list AND the dashboard, so both always agree.
@@ -112,7 +113,7 @@ async function getFilterOptions() {
     }),
   ]);
   return {
-    positions: ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'],
+    positions: POSITIONS,
     teams: teams.map((t) => t.team),
     nationalities: nationalities.map((n) => n.nationality),
     ranges: {
