@@ -1,4 +1,5 @@
 // Register, login and "who am I" logic
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const prisma = require('../utils/prisma');
@@ -44,12 +45,16 @@ async function register({ name, email, password }) {
   return { user: publicUser(user), token: createToken(user) };
 }
 
+// fake hash made once at startup, used when the email doesn't exist
+// so login takes the same time whether the account is real or not
+const DUMMY_HASH = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), SALT_ROUNDS);
+
 async function login({ email, password }) {
   const user = await prisma.user.findUnique({ where: { email } });
-  // Same message whether the email or the password is wrong, so attackers
-  // can't use the login form to discover which emails have accounts
-  const valid = user && (await bcrypt.compare(password, user.passwordHash));
-  if (!valid) throw new HttpError(401, 'Incorrect email or password.');
+  // same message for wrong email and wrong password so nobody can tell which emails have accounts
+  // always run bcrypt too, otherwise unknown emails answer faster and the timing gives it away
+  const valid = await bcrypt.compare(password, user ? user.passwordHash : DUMMY_HASH);
+  if (!user || !valid) throw new HttpError(401, 'Incorrect email or password.');
   return { user: publicUser(user), token: createToken(user) };
 }
 
