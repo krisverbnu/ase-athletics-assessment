@@ -43,7 +43,7 @@ const api = axios.create({
 
 // Before every request: attach the login token if we have one
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = getToken();
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
