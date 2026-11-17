@@ -112,7 +112,7 @@ Built by **Kristina Verbova** for the ASE Athletics technical assessment, Novemb
 | Shareable comparison URLs | ✅ Copy link |
 | Export chart data | ✅ CSV on every chart |
 | Export to PDF | ✅ Scouting reports (print / save as PDF) |
-| Unit, API and component tests | ✅ 43 API + 18 frontend, in CI |
+| Unit, API and component tests | ✅ 45 API + 21 frontend, in CI |
 | Production deployment, secrets management, hosted DB | ✅ Vercel, Render, Neon |
 | CDN for static assets | ✅ Vercel's edge network |
 | Export comparison as image / PDF | ➖ CSV and shareable link instead |
@@ -178,13 +178,13 @@ cd frontend && npm run dev    # app on http://localhost:5173
 ## Tests and CI
 
 ```bash
-cd backend && npm test     # 43 tests
-cd frontend && npm test    # 18 tests
+cd backend && npm test     # 45 tests
+cd frontend && npm test    # 21 tests
 ```
 
-- **Backend:** the data merge (90 players, no duplicates, no invented values), dashboard maths, login protection, validation, player create/edit/delete, report ownership, CORS, rate limiting and the sign-up domain rule. The database is replaced with a fake, so tests run in about 2 seconds with no network.
-- **Frontend:** URL filters, formatting, chart data, the dashboard links (each keeps the dashboard's filters), and the contracts card rendered as a user sees it.
-- **CI:** every push runs both test suites, the frontend lint and the production build on GitHub Actions.
+- **Backend:** the data merge (90 players, no duplicates, no invented values), dashboard maths, login protection, validation, player create/edit/delete, report ownership, CORS, rate limiting, the sign-up domain rule, and the server refusing to start without its required settings. The database is replaced with a fake, so tests run in about 2 seconds with no network.
+- **Frontend:** URL filters, formatting, chart data, the dashboard links (each keeps the dashboard's filters), the contracts card, and the compare selection surviving a refresh, rendered as a user sees them.
+- **CI:** every push runs linting, formatting checks and both test suites, and builds the frontend, on GitHub Actions.
 
 ## Project structure
 
