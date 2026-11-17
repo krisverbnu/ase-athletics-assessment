@@ -2,7 +2,39 @@
 // Pages call functions like getPlayers(); they never use axios directly.
 import axios from 'axios';
 
-export const TOKEN_KEY = 'ase_token';
+const TOKEN_KEY = 'ase_token';
+
+// some browsers block localStorage or only let you read it, saving throws an error
+// so we also keep the token in memory: login always works on this visit
+// if saving failed you just have to log in again after a refresh
+let memoryToken = null;
+
+export function getToken() {
+  if (memoryToken) return memoryToken; // set on this visit, always the newest
+  try {
+    return localStorage.getItem(TOKEN_KEY); // saved from earlier visit
+  } catch {
+    return null;
+  }
+}
+
+export function saveToken(token) {
+  memoryToken = token;
+  try {
+    localStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    // storage blocked, memory copy is enough
+  }
+}
+
+export function clearToken() {
+  memoryToken = null;
+  try {
+    localStorage.removeItem(TOKEN_KEY);
+  } catch {
+    // storage blocked, nothing saved there anyway
+  }
+}
 
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api`,

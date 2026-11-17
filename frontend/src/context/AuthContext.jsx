@@ -1,37 +1,29 @@
 // Who is logged in, shared with every page through React Context.
 // Any component can call useAuth() to get { user, login, register, logout }.
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { TOKEN_KEY } from '../services/api';
+import { clearToken, getToken, saveToken } from '../services/api';
 import * as authService from '../services/authService';
 
 const AuthContext = createContext(null);
 
-function readToken() {
-  try {
-    return localStorage.getItem(TOKEN_KEY);
-  } catch {
-    return null; // private mode or blocked storage
-  }
-}
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   // "checking" while we ask the API whether a saved token is still valid
-  const [status, setStatus] = useState(readToken() ? 'checking' : 'ready');
+  const [status, setStatus] = useState(getToken() ? 'checking' : 'ready');
 
   const saveSession = useCallback(({ user: u, token }) => {
-    localStorage.setItem(TOKEN_KEY, token);
+    saveToken(token);
     setUser(u);
   }, []);
 
   const clearSession = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    clearToken();
     setUser(null);
   }, []);
 
   // On first load: if a token is saved, check it's still valid and load the user
   useEffect(() => {
-    if (!readToken()) return;
+    if (!getToken()) return;
     authService
       .getMe()
       .then(setUser)
