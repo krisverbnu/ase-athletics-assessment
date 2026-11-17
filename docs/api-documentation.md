@@ -256,7 +256,7 @@ Every number and chart on the dashboard in one request, already filtered. Accept
 |---|---|
 | `asOf` | Date used for the "contracts ending soon" list. Defaults to the data date, `2025-07-08` |
 
-**Response `200`** (lists shortened)
+**Response `200`** (lists shortened; real figures from the full data set, but the `today` contract counts depend on the day you call it)
 ```json
 {
   "data": {

@@ -87,7 +87,7 @@ The brief suggests a `store/` folder for state management. This app doesn't need
 
 | State | Where | Why |
 |---|---|---|
-| Who's logged in, the token | `AuthContext` + `localStorage` | Needed everywhere; survives a refresh |
+| Who's logged in, the token | `AuthContext` + `localStorage` (memory if the browser blocks storage) | Needed everywhere; survives a refresh |
 | Toast messages | `ToastContext` | Any page can show one |
 | Filters, search, sort, page, compare selection, active tab | **The URL** (`?position=Forward&sort=goals&page=2`) | Refresh keeps your view; the back button works; any view can be shared as a link |
 | Last player filters for the session | `sessionStorage` | Returning to Players brings your filters back (a brief bonus), cleared when the tab closes |
@@ -100,7 +100,7 @@ This covers everything a Redux store would, with less code: URL for anything sha
 
 `src/services/api.js` sets up one axios instance used for every call:
 
-1. **Before each request:** attach the token from `localStorage`.
+1. **Before each request:** attach the token. `getToken()` checks memory first, then `localStorage`, so login keeps working if the browser blocks storage.
 2. **After each response:** if the API says `401` (token expired), fire an `auth:expired` event; `AuthContext` logs the user out and sends them to the login page.
 3. **Errors become sentences:** `getErrorMessage()` turns any failure into something a user can read ("Cannot reach the server...", or the API's own message). `getFieldErrors()` turns validation `details` into `{ field: message }` so forms highlight the exact inputs.
 4. **Timeout 60 seconds**, because the free API can take about 50 seconds to wake up.

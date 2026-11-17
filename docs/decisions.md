@@ -24,7 +24,7 @@ Why the app is built the way it is: the technology choices, the design decisions
 ## Design decisions
 
 ### API design
-- **REST with consistent responses.** Every success is `{ data, meta }` and every error `{ error: { message, details } }`, so the frontend has exactly one way to read either.
+- **REST with consistent responses.** Successful responses use `{ data, meta }` (`meta` only on lists). The exceptions are deliberate: the health check returns `{ "status": "ok" }`, and logout and deletes return `204` with no body. Every error uses `{ error: { message, details } }`, so the frontend has one way to read errors.
 - **Correct status codes**: 201 for create, 204 for delete, 400 with field details for invalid input, 401 vs 403 (not logged in vs not allowed), 404, 409 for a taken email, 429 for rate limits.
 - **Validation before logic.** Joi checks every body, query and path parameter first. Unknown fields are stripped, so a client can't set things like `id` or `scoutId`.
 - **One flexible list endpoint** (`GET /players`) handles search, every filter, sorting and pagination through query parameters, instead of separate endpoints per filter. The comparison tool reuses it with `?ids=1,2,3`.
@@ -63,7 +63,7 @@ Skeleton loaders (the page's shape appears immediately), short subtle transition
 | `GET /players/search` returns only 5 fields | Autocomplete responses are tiny |
 | One dashboard request | Fewer round trips; the count of value history rows is fetched as a number, not the rows |
 | Pooled database connections and one shared Prisma client | No connection storms |
-| Code splitting (`React.lazy`) | First download cut from 874 kB to 340 kB; the chart library loads only with a chart page |
+| Code splitting (`React.lazy`) | Main JavaScript file cut from 874 kB to about 345 kB (uncompressed, as reported by the build); the chart library loads only with a chart page |
 | Range sliders apply on release, search on typing pause | No request on every pixel or keystroke |
 | Static frontend on Vercel's CDN | Assets served from a location close to the user |
 

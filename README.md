@@ -271,7 +271,7 @@ Errors always look the same: `{ "error": { "message": "...", "details": [{ "fiel
 | **Validation at the edge with Joi** | Every request is checked before any logic runs; unknown fields are dropped and all errors are returned at once. |
 | **State in the URL** for filters, sort, page, compare and tabs | Views survive refresh and can be shared as links. Context API only holds what's truly global (login, toasts), so no Redux was needed. |
 | **Dashboard maths on the server** | One request returns every figure, already filtered, so the browser does no heavy lifting and numbers are consistent everywhere. |
-| **Code splitting** | Pages load when first opened, cutting the first download from 874 kB to 340 kB. |
+| **Code splitting** | Pages load when first opened, cutting the main JavaScript file from 874 kB to about 345 kB (uncompressed, as reported by the build). |
 | **Colours from ASE's guidelines, adjusted for accessibility** | Primary buttons use a darker blue from the same palette to pass WCAG AA contrast. Chart colours were checked for colour-blind separation. |
 | **Free hosting split three ways** | Vercel, Render and Neon are each strong at one thing and free, with deploys on every push. |
 
@@ -283,7 +283,7 @@ ASE's data has real gaps, and handling them is part of the brief. The rule throu
 
 - **Merged two player files into 90 players.** The one player in both files was enriched, not duplicated. A retired player was skipped.
 - **Market value exists for only 12 of 90 players.** No estimates; the gap is labelled everywhere and shown in the dashboard's data quality panel.
-- **Salary has no unit.** It's treated as weekly in euros, and labelled as such.
+- **Salary has no unit.** The app assumes weekly euros, based on the scale of the figures, and labels it as assumed on the profile, the compare table and CSV exports. This should be confirmed with ASE.
 - **The data is a snapshot from 8 July 2025.** Contracts are shown from that date and from today, side by side.
 - **Monthly form had months with no year.** The year is inferred from the season.
 - **One scout report pointed at a missing player.** It was re-linked by name.
@@ -304,7 +304,7 @@ Full details, with evidence for each decision: [`docs/data-quality.md`](docs/dat
 
 **Known gap: who can change players.** Reports are protected by author, but players are shared data, so any logged-in scout can edit or delete any player. In a real club tool I'd add roles: scouts can add and edit players, only a head of scouting can delete them. For production I'd also make sign-up invite-only or company-domain only, with email verification.
 
-**Trade-off: token in localStorage.** The login token is stored in `localStorage` and sent as a header. That's simple and works across the frontend (Vercel) and API (Render), which are on different domains. The risk is that a cross-site scripting bug could read it. React escapes all rendered content and the app never injects raw HTML, which keeps that risk low. In production I'd serve both from the same domain and move the token to an `HttpOnly`, `Secure`, `SameSite` cookie, which JavaScript can't read at all. I didn't do that here because cross-domain cookies are increasingly blocked by browsers, and a broken login would be worse than a documented trade-off.
+**Trade-off: token in localStorage.** The login token is stored in `localStorage` and sent as a header. That's simple and works across the frontend (Vercel) and API (Render), which are on different domains. The risk is that a cross-site scripting bug could read it. React escapes rendered content by default and the app never injects raw HTML, which reduces that risk but doesn't remove it (a vulnerable dependency could still introduce one). If the browser blocks `localStorage`, the token is kept in memory instead, so login still works and the user simply logs in again after a refresh. In production I'd serve both from the same domain and move the token to an `HttpOnly`, `Secure`, `SameSite` cookie, which JavaScript can't read at all. I didn't do that here because cross-domain cookies are increasingly blocked by browsers, and a broken login would be worse than a documented trade-off.
 
 ## Performance
 
@@ -312,7 +312,7 @@ Full details, with evidence for each decision: [`docs/data-quality.md`](docs/dat
 - One request for the whole dashboard, calculated on the server
 - Autocomplete returns only the 5 fields it needs; search waits for a typing pause
 - Pooled database connections through Neon and a single shared Prisma client
-- Pages load on demand: first download cut from 874 kB to 340 kB
+- Pages load on demand: main JavaScript file cut from 874 kB to about 345 kB (uncompressed)
 - Static frontend served from Vercel's CDN
 
 At larger scale I'd move the dashboard aggregations into SQL and cache them. More in [docs/decisions.md](docs/decisions.md#performance).

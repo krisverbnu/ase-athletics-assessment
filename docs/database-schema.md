@@ -52,8 +52,10 @@ erDiagram
         int id PK
         int playerId FK
         date month
+        int appearances
         int goals
         int assists
+        float averageRating
     }
     scout_reports {
         int id PK

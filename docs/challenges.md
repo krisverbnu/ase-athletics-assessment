@@ -2,13 +2,14 @@
 
 A log of the real problems hit while building this app, newest first. Each entry follows the same shape: **symptom** (what I saw), **cause** (what was really going on), **fix**, **lesson**.
 
-A note on context: I built this with Claude Code as a coding assistant. Some entries mention files being "copied onto the Mac": the assistant wrote and tested code in its own environment, and changes were then copied into my local repository. See [AI assistance](../README.md#ai-assistance).
+A note on context: I built this with Claude Code as a development assistant for implementation, debugging and testing. Early on, some changes were developed and tested in a separate environment and then transferred into my local repository, where each file was checked against the tested version before committing. In the final code review I made the changes myself. See [AI assistance](../README.md#ai-assistance).
 
 ## Contents
 
 | Area | Challenge |
 |---|---|
-| Workflow | [A failed check didn't stop the commit](#a-failed-check-didnt-stop-the-commit) |
+| Frontend | [Login failed when the browser blocked storage](#login-failed-when-the-browser-blocked-storage) |
+| Workflow | [Development workflow and tooling mistakes](#development-workflow-and-tooling-mistakes) |
 | Workflow | [Commits that were too big to follow](#commits-that-were-too-big-to-follow) |
 | Frontend | [Chart clicks didn't say which bar was clicked](#chart-clicks-didnt-say-which-bar-was-clicked) |
 | Repository | [Stray files committed: duplicate workflows and unused Neon setup files](#stray-files-committed-duplicate-workflows-and-unused-neon-setup-files) |
@@ -16,58 +17,51 @@ A note on context: I built this with Claude Code as a coding assistant. Some ent
 | Frontend | [Chart legends and tooltips in the wrong order](#chart-legends-and-tooltips-in-the-wrong-order) |
 | Frontend | [Mobile check: invisible text widening the page, and cut-off player rows](#mobile-check-invisible-text-widening-the-page-and-cut-off-player-rows) |
 | Security, performance | [Any scout could edit another scout's report, and the app was slow to first load](#any-scout-could-edit-another-scouts-report-and-the-app-was-slow-to-first-load) |
-| Tooling | [`code` command not found](#code-command-not-found) |
 | Testing | [Making the code testable, and a test that was wrong](#making-the-code-testable-and-a-test-that-was-wrong) |
 | Frontend | [Contracts card too cramped, and the dashboard scrolled sideways on phones](#contracts-card-too-cramped-and-the-dashboard-scrolled-sideways-on-phones) |
 | Workflow | [Dashboard still went white after the fix](#dashboard-still-went-white-after-the-fix) |
 | Local setup | ["Cannot reach the server" after restarting](#cannot-reach-the-server-after-restarting) |
 | Frontend, API | [Dashboard went white after the contracts update](#dashboard-went-white-after-the-contracts-update) |
 | Various | [Earlier challenges in the build](#earlier-challenges-in-the-build) |
+| | [What I learned](#what-i-learned) |
 
-## A failed check didn't stop the commit
+## Login failed when the browser blocked storage
 
-Two small terminal mistakes in a row while committing code review fixes.
+Found in a review of the login code, not reported by a user.
 
-**Symptom.**
+**Symptom.** In a browser that blocks `localStorage` (Safari with "Block all cookies", or older private modes that let you read storage but not save to it), logging in did nothing: the user stayed on the login page.
 
-- Prettier printed `[warn] Code style issues found in src/pages/Players.jsx`, but the commit and push still went through, so CI on GitHub would fail its format check.
-- A commit typed as `git commit -m "Correct comments" git push` on one line failed with `error: pathspec 'git' did not match any file(s) known to git`.
-
-**Cause.**
-
-- `&&` only links commands on the same line: if one fails, the rest of that line is skipped. The `git add`, `commit` and `push` were on separate lines, so they ran anyway. The Prettier problem itself was a blank line containing two invisible spaces.
-- With commit and push on one line, git read `git` and `push` as file names to commit (a pathspec is a file path), couldn't find them, and stopped.
+**Cause.** Reading and writing `localStorage` can throw an error. Reading was protected with try/catch, but saving the token wasn't, and two files (`api.js` and `AuthContext.jsx`) each touched storage directly.
 
 **Fix.**
 
-1. Ran `npx prettier --write` on the file, checked again, and committed it.
-2. From then on, chained every commit onto its checks: `npm run lint && npm run format:check && npm test && git add ... && git commit -m "..." && git push`. The next time a check failed (a missing `require` in `index.js`), nothing was committed.
+1. Moved all token handling into three functions in `api.js`: `getToken`, `saveToken` and `clearToken`, each with try/catch.
+2. The token is also kept in memory. `getToken` checks memory first, so a token saved on this visit always wins over an old one left in storage.
+3. Checked in a browser with storage fully blocked, read-only, and normal: login works in all three.
 
-**Lesson.**
+**Trade-off.** If storage is blocked, the user has to log in again after a refresh. This is about reliability, not security: a token in memory is no safer against a cross-site scripting bug than one in storage.
 
-- Read the output before moving on: a `[warn]` means stop.
-- Chain the commit onto the checks, so a failure stops everything.
-- One command per line, unless they're joined with `&&`.
+**Lesson.** Browser storage isn't guaranteed. Keep access to it in one place, and plan for it failing.
+
+## Development workflow and tooling mistakes
+
+Small mistakes in the terminal, grouped together because they share one lesson: read the output before moving on.
+
+| Symptom | Cause | Fix |
+| --- | --- | --- |
+| Prettier printed `[warn]`, but the commit and push still went through, so CI failed its format check | `&&` only stops the rest of the *same* line; `git add`, `commit` and `push` were on separate lines | Fixed the formatting, then chained every commit onto its checks: `npm run lint && npm run format:check && npm test && git add ... && git commit ... && git push`. The next time a check failed, nothing was committed |
+| `git commit -m "..." git push` failed with `pathspec 'git' did not match any file(s)` | Typed on one line, so git read `git` and `push` as file names | One command per line, unless joined with `&&` |
+| `zsh: command not found: code` | VS Code's `code` command isn't on the Mac's PATH by default | Used the VS Code sidebar instead; it can be installed from the command palette |
+
+**Lesson.** A `[warn]` or an error means stop. Chaining the commit onto the checks makes a failure stop everything automatically.
 
 ## Commits that were too big to follow
 
-Not a bug, but a working habit I changed partway through.
+Not a bug, but a working habit I changed.
 
-**Symptom.** Looking back at the history, the early commits are each a whole feature: "Add frontend: auth, layout, player list, profile and form" is 38 files and about 2,600 lines, and "Add full REST API" is 27 files. One later commit bundled documentation, Prettier, linting and a new workflow into 85 files. A reviewer can't easily see what changed and why, and if one part had broken something, it couldn't have been undone on its own.
+At the start I committed at feature milestones ("the frontend works now"), so early commits each hold a whole feature. That makes changes hard to review, and impossible to undo one at a time. I moved to small, focused commits: one change, checked, committed and pushed before the next. I left the earlier history as it is, as an honest record of how the project was built.
 
-**Cause.** At the start I was building fast and committing at milestones ("the frontend works now") rather than after each change. When several unrelated tasks were finished together, they went into one commit.
-
-**Fix.**
-
-1. Switched to one commit per change: the dashboard links, then moving them into a tested helper, then making the club names keyboard links, each with its own commit and a message saying what it does.
-2. When several steps touch the same file, did them one at a time: make the change, commit, push, then the next.
-3. Left the earlier history as it is rather than rewriting it with a force push: it's an honest record of how the project was built.
-
-**Lesson.**
-
-- One commit = one change you could describe in a sentence. If the message needs "and" twice, it's probably two commits.
-- Small commits are easier to review, easier to undo, and make `git log` read like a diary of the project.
-- Commit when something works, not when everything works.
+**Lesson.** One commit, one change you can describe in a sentence. Commit when something works, not when everything works.
 
 ## Chart clicks didn't say which bar was clicked
 
@@ -206,18 +200,6 @@ A code review found that report editing had no ownership check; a build check fo
 - Never rely on hiding a button for security; anyone can send the request directly.
 - Check the build output size, not just whether it builds.
 
-## `code` command not found
-
-The terminal couldn't open VS Code by name because the `code` command was never installed on the Mac.
-
-**Symptom.** Running `code .github/workflows/ci.yml` printed `zsh: command not found: code`.
-
-**Cause.** VS Code on macOS doesn't add its `code` command to the terminal's PATH (the list of folders the terminal searches for commands) by default.
-
-**Fix.** Created the file from the VS Code sidebar instead (right-click the folder, New File). For the future: Cmd + Shift + P, then "Shell Command: Install 'code' command in PATH".
-
-**Lesson.** "command not found" means the terminal doesn't know the program, not that the file or folder is wrong. The earlier `mkdir` in the same command still worked.
-
 ## Making the code testable, and a test that was wrong
 
 Adding automated tests needed small changes to the code itself, and one failing test turned out to be a mistake in the test, not the app.
@@ -320,7 +302,7 @@ The frontend expected a field the backend wasn't sending yet, and React crashed 
 
 **Symptom.** After the new two-date Contracts card was added, the dashboard on localhost loaded for a moment, then the whole page turned white. No error message on screen.
 
-**Cause.** The new card read `stats.contractStatus.dataDate`. The frontend code had updated, but the local backend was still running the old code (started with `npm start`, which doesn't reload on changes). The old backend didn't send `contractStatus`, so the code tried to read a property of `undefined`. In React, an error while drawing a component unmounts the whole app, which is why the page went blank rather than just one card.
+**Cause.** The new card read `stats.contractStatus.dataDate`. The frontend code had updated, but the local backend was still running the old code (started with `npm start`, which doesn't reload on changes). The old backend didn't send `contractStatus`, so the code tried to read a property of `undefined`. Without an error boundary, a rendering error makes React remove the component tree around it; here that was the whole app, which is why the page went blank rather than just one card. (An error boundary was added later, so a crash now shows a message inside the layout instead.)
 
 **Fix.**
 
@@ -352,3 +334,11 @@ Shorter entries for problems solved earlier, latest first.
 | Database | Latest Prisma (v7) was complex and its binaries were blocked | Breaking changes in the new major version | Pinned Prisma 6 | Pick stable, well-documented versions under a deadline |
 | Frontend | Charts were blank in automated screenshots | Recharts animations hadn't finished | Turned chart animations off | Test what users see, not just what loads |
 | Frontend | Linter flagged state set inside effects | React's newer rules about effects | Rewrote the data hook with a key pattern | Linters catch real bugs early; fix rather than silence them |
+
+## What I learned
+
+Getting something working was only the first step. The problems above taught me to investigate instead of guessing: the browser console, the server logs and a failing test usually point straight at the cause.
+
+I understand much better how the frontend and backend depend on each other, why security checks have to happen on the server and not just in the interface, and why validation matters most when the source data is incomplete.
+
+Most of all, I now treat testing, documentation and small, reviewable changes as part of building, not something to add at the end.

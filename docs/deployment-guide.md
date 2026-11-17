@@ -89,8 +89,8 @@ Vite only exposes variables starting with `VITE_`, and bakes them in **at build 
 
 | Job | Steps |
 |---|---|
-| Backend | `npm ci` → `npm test` (Jest + Supertest, fake database, no secrets needed) |
-| Frontend | `npm ci` → `npm run lint` → `npm test` (Vitest) → `npm run build` |
+| Backend | `npm ci` → `npm run lint` → `npm run format:check` → `npm test` (Jest + Supertest, fake database, no secrets needed) |
+| Frontend | `npm ci` → `npm run lint` → `npm run format:check` → `npm test` (Vitest) → `npm run build` |
 
 A red ✗ on a commit means something broke before anyone has to click through the app.
 
